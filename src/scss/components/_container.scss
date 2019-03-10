@@ -1,0 +1,21 @@
+.container {
+  width: 100%;
+  border: 1px solid $cBorder;
+
+  &__body {
+    height: 100%;
+
+    &--scroll {
+      overflow: hidden;
+      overflow-x: auto;
+    }
+  }
+
+  &__lists {
+    display: inline-block;
+    height: 100%;
+    min-width: 100%;
+    white-space: nowrap;
+    padding: 8px 4px;
+  }
+}
