@@ -1,0 +1,13 @@
+.item {
+  display: block;
+  padding: 4px 0;
+
+  &__box {
+    padding: 8px;
+    border: 1px solid $cBorder;
+    background-color: $cBackground;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 18px;
+  }
+}
