@@ -8,6 +8,7 @@
     "build": "webpack",
     "watch": "webpack --watch",
     "serve": "http-server . -p 4000 -o",
+    "dev": "npm run watch | npm run serve",
     "production": "webpack -p"
   },
   "author": "dobrapyra",
@@ -23,5 +24,6 @@
     "style-loader": "^0.23.1",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.1.2"
-  }
+  },
+  "dependencies": {}
 }

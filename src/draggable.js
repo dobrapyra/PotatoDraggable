@@ -144,14 +144,43 @@ class PotatoDraggable {
     this.unbindActiveEvents();
   }
 
+  createGhost() {
+    const dragElRect = this.dragEl.getBoundingClientRect();
+    this.ghostEl = this.dragEl.cloneNode(true);
+    this.ghostEl.style.position = 'absolute';
+    this.ghostEl.style.top = `${(dragElRect.y - this.startPoint.y)}px`;
+    this.ghostEl.style.left = `${(dragElRect.x - this.startPoint.x)}px`;
+    this.ghostEl.style.width = `${dragElRect.width}px`;
+    this.ghostEl.style.height = `${dragElRect.height}px`;
+    this.ghostEl.style.pointerEvents = 'none';
+
+    this.updateGhostPosition(this.startPoint);
+
+    document.body.appendChild(this.ghostEl);
+  }
+
+  updateGhostPosition(point) {
+    this.ghostEl.style.transform = `translate(${point.x}px, ${point.y}px)`;
+  }
+
+  destroyGhost() {
+    this.ghostEl.parentNode.removeChild(this.ghostEl);
+  }
+
   dragStart() {
     this.dragging = true;
+
     this.dropEl = this.closestContainer(this.dragEl);
-    this.startPoint = this.movePoint;
+    if (this.movePoint) this.startPoint = this.movePoint;
+
+    this.createGhost();
+
     this.dragEl.style.opacity = 0.5;
   }
 
   dragMove(point) {
+    this.updateGhostPosition(point);
+
     const dropEl = this.closestContainer(document.elementFromPoint(point.x, point.y));
     if (!dropEl) return;
 
@@ -166,6 +195,9 @@ class PotatoDraggable {
 
   dragEnd() {
     this.dragging = false;
+
+    this.destroyGhost();
+
     this.dragEl.style.opacity = '';
     this.dragEl = null;
     this.dropEl = null;
