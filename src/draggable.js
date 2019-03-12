@@ -54,6 +54,19 @@ class PotatoDraggable {
     return new Point(point.clientX, point.clientY);
   }
 
+  getRect(el) {
+    return el.getBoundingClientRect();
+  }
+
+  getMidpoint(el) {
+    const elRect = this.getRect(el);
+    return new Point(elRect.width / 2 + elRect.x, elRect.height / 2 + elRect.y);
+  }
+
+  pointToEl(point) {
+    return document.elementFromPoint(point.x, point.y);
+  }
+
   closestContainer(el) {
     return this.closest(el, el => el.hasAttribute('data-pd-drop-container'));
   }
@@ -84,7 +97,7 @@ class PotatoDraggable {
   onMouseDown(e) {
     const point = this.getPoint(e);
 
-    const dragEl = this.closestDraggable(document.elementFromPoint(point.x, point.y));
+    const dragEl = this.closestDraggable(this.pointToEl(point));
     if (!dragEl) return;
 
     this.dragEl = dragEl;
@@ -96,6 +109,8 @@ class PotatoDraggable {
 
   onMouseMove(e) {
     const point = this.getPoint(e);
+
+    this.movePoint = point;
 
     e.preventDefault();
     this.dragMove(point);
@@ -113,7 +128,7 @@ class PotatoDraggable {
   onTouchStart(e) {
     const point = this.getPoint(e);
 
-    const dragEl = this.closestDraggable(document.elementFromPoint(point.x, point.y));
+    const dragEl = this.closestDraggable(this.pointToEl(point));
     if (!dragEl) return;
 
     this.dragEl = dragEl;
@@ -146,7 +161,7 @@ class PotatoDraggable {
   }
 
   createGhost() {
-    const dragElRect = this.dragEl.getBoundingClientRect();
+    const dragElRect = this.getRect(this.dragEl);
     this.ghostEl = this.dragEl.cloneNode(true);
     this.ghostEl.style.position = 'absolute';
     this.ghostEl.style.top = `${(dragElRect.y - this.startPoint.y)}px`;
@@ -185,20 +200,56 @@ class PotatoDraggable {
   dragMove(point) {
     this.updateGhostPosition(point);
 
-    const dropEl = this.closestContainer(document.elementFromPoint(point.x, point.y));
+    const overEl = this.pointToEl(point);
+
+    const dropEl = this.closestContainer(overEl);
     if (!dropEl) return;
 
-    if (
-      dropEl !== this.dropEl &&
-      !this.closest(dropEl, el => el === this.dragEl)
-    ) {
+    // dropEl inside dragEl
+    if (this.closest(dropEl, el => el === this.dragEl)) return;
+
+    const dragEl = this.closestDraggable(overEl);
+    if (!dragEl) {
+      // the same dropEL
+      if (dropEl === this.dropEl) return;
+
       this.dropEl = dropEl;
       this.dropEl.appendChild(this.dragEl);
+      return;
     }
+
+    // the same dragEl
+    if (dragEl === this.dragEl) return;
+
+    // assumption: dragEl.parentNode === dropEl 
+
+    if (dropEl !== this.dropEl) {
+      this.dropEl = dropEl;
+    }
+
+    // const otherDragRect = this.getRect(dragEl);
+    const moveDiff = this.startPoint.diff(point);
+    const axis = Math.abs(moveDiff.x) > Math.abs(moveDiff.y) ? 'x' : 'y';
+
+    const dragMidpoint = this.getMidpoint(dragEl);
+    if (point[axis] < dragMidpoint[axis]) {
+      this.dropEl.insertBefore(this.dragEl, dragEl);
+      return;
+    }
+
+    const nextDragEl = dragEl.nextSibling;
+    if (nextDragEl) {
+      this.dropEl.insertBefore(this.dragEl, nextDragEl);
+      return;
+    }
+
+    this.dropEl.appendChild(this.dragEl);
   }
 
   dragEnd() {
     this.dragging = false;
+    this.startPoint = null;
+    this.movePoint = null;
 
     this.destroyGhost();
 
