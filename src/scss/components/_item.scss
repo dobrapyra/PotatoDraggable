@@ -1,7 +1,7 @@
 .item {
   display: block;
   padding: 4px 0;
-
+  
   &__box {
     padding: 8px;
     border: 1px solid $cBorder;
@@ -9,5 +9,19 @@
     font-weight: 600;
     font-size: 14px;
     line-height: 18px;
+  }
+
+  $root: &;
+  
+  &[data-pd-drag] {
+    #{$root}__box {
+      opacity: 0.5
+    }
+  }
+
+  &[data-pd-ghost] {
+    #{$root}__box {
+      box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
+    }
   }
 }
