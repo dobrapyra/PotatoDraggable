@@ -21,7 +21,6 @@ class PotatoDraggable {
     this.onMouseUp = this.onMouseUp.bind(this);
 
     this.eventOptions = this.getEventOptions();
-    this.body = document.getElementsByTagName('body')[0];
     this.scrollEl = document.scrollingElement || document.documentElement || document;
 
     this.bindPassiveEvents();
@@ -41,7 +40,7 @@ class PotatoDraggable {
   }
 
   closest(el, match) {
-    for (;el && el !== this.body;) {
+    for (;el && el !== document;) {
       if (match(el)) return el;
       el = el.parentNode;
     }
