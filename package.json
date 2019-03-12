@@ -8,7 +8,6 @@
     "build": "webpack",
     "watch": "webpack --watch",
     "serve": "http-server . -p 4000 -o",
-    "dev": "npm run watch | npm run serve",
     "production": "webpack -p"
   },
   "author": "dobrapyra",
