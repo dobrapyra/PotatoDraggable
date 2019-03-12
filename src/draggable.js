@@ -21,6 +21,7 @@ class PotatoDraggable {
     this.onMouseUp = this.onMouseUp.bind(this);
 
     this.eventOptions = this.getEventOptions();
+    this.body = document.body;
     this.scrollEl = document.scrollingElement || document.documentElement || document;
 
     this.bindPassiveEvents();
@@ -109,8 +110,6 @@ class PotatoDraggable {
   onMouseMove(e) {
     const point = this.getPoint(e);
 
-    this.movePoint = point;
-
     e.preventDefault();
     this.dragMove(point);
   }
@@ -171,7 +170,7 @@ class PotatoDraggable {
 
     this.updateGhostPosition(this.startPoint);
 
-    document.body.appendChild(this.ghostEl);
+    this.body.appendChild(this.ghostEl);
 
     this.ghostEl.setAttribute('data-pd-ghost', '');
   }
@@ -182,7 +181,7 @@ class PotatoDraggable {
   }
 
   destroyGhost() {
-    this.ghostEl.parentElement.removeChild(this.ghostEl);
+    this.body.removeChild(this.ghostEl);
   }
 
   dragStart() {
