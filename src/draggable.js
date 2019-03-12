@@ -2,9 +2,14 @@ import Point from './point';
 
 class PotatoDraggable {
   constructor() {
+    this.draggableAttr = 'data-pd-draggable-item';
+    this.containerAttr = 'data-pd-drop-container';
+
     this.dragEl = null;
     this.dropEl = null;
     this.ghostEl = null;
+
+    this.groupId = '';
 
     this.dragging = false;
     this.touchTimeout = null;
@@ -21,6 +26,7 @@ class PotatoDraggable {
     this.onMouseUp = this.onMouseUp.bind(this);
 
     this.eventOptions = this.getEventOptions();
+    this.body = document.body;
     this.scrollEl = document.scrollingElement || document.documentElement || document;
 
     this.bindPassiveEvents();
@@ -37,14 +43,6 @@ class PotatoDraggable {
       window.removeEventListener('check-passive', cb, opt);
     } catch (e) { passiveSupport = false; }
     return passiveSupport ? { passive: false } : false;
-  }
-
-  closest(el, match) {
-    for (;el;) {
-      if (match(el)) return el;
-      el = el.parentElement;
-    }
-    return null;
   }
 
   getPoint(e) {
@@ -66,12 +64,27 @@ class PotatoDraggable {
     return document.elementFromPoint(point.x, point.y);
   }
 
-  closestContainer(el) {
-    return this.closest(el, el => el.hasAttribute('data-pd-drop-container'));
+  closest(el, match) {
+    for (;el;) {
+      if (match(el)) return el;
+      el = el.parentElement;
+    }
+    return null;
   }
 
-  closestDraggable(el) {
-    return this.closest(el, el => el.hasAttribute('data-pd-draggable-item'));
+  closestByAttr(el, attrName, attrValue) {
+    return this.closest(el, (el) => {
+      const attr = el.getAttribute(attrName);
+      return attrValue ? attr === attrValue : attr !== null;
+    });
+  }
+
+  closestContainer(el, groupId) {
+    return this.closestByAttr(el, this.containerAttr, groupId);
+  }
+
+  closestDraggable(el, groupId) {
+    return this.closestByAttr(el, this.draggableAttr, groupId);
   }
 
   bindPassiveEvents() {
@@ -108,8 +121,6 @@ class PotatoDraggable {
 
   onMouseMove(e) {
     const point = this.getPoint(e);
-
-    this.movePoint = point;
 
     e.preventDefault();
     this.dragMove(point);
@@ -171,7 +182,7 @@ class PotatoDraggable {
 
     this.updateGhostPosition(this.startPoint);
 
-    document.body.appendChild(this.ghostEl);
+    this.body.appendChild(this.ghostEl);
 
     this.ghostEl.setAttribute('data-pd-ghost', '');
   }
@@ -182,10 +193,13 @@ class PotatoDraggable {
   }
 
   destroyGhost() {
-    this.ghostEl.parentElement.removeChild(this.ghostEl);
+    this.body.removeChild(this.ghostEl);
   }
 
-  dragStart() {
+  dragStart() {    
+    this.groupId = this.dragEl.getAttribute(this.draggableAttr);
+    if (this.groupId === null) return; // probably not necessary
+
     this.dragging = true;
 
     this.dropEl = this.closestContainer(this.dragEl);
@@ -201,7 +215,7 @@ class PotatoDraggable {
 
     const overEl = this.pointToEl(point);
 
-    const dropEl = this.closestContainer(overEl);
+    const dropEl = this.closestContainer(overEl, this.groupId);
     if (!dropEl) return;
 
     // dropEl inside dragEl
@@ -250,6 +264,8 @@ class PotatoDraggable {
     this.dragging = false;
     this.startPoint = null;
     this.movePoint = null;
+
+    this.groupId = '';
 
     this.destroyGhost();
 
