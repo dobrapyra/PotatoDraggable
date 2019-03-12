@@ -40,9 +40,9 @@ class PotatoDraggable {
   }
 
   closest(el, match) {
-    for (;el && el !== document;) {
+    for (;el;) {
       if (match(el)) return el;
-      el = el.parentNode;
+      el = el.parentElement;
     }
     return null;
   }
@@ -182,7 +182,7 @@ class PotatoDraggable {
   }
 
   destroyGhost() {
-    this.ghostEl.parentNode.removeChild(this.ghostEl);
+    this.ghostEl.parentElement.removeChild(this.ghostEl);
   }
 
   dragStart() {
@@ -207,38 +207,39 @@ class PotatoDraggable {
     // dropEl inside dragEl
     if (this.closest(dropEl, el => el === this.dragEl)) return;
 
-    const dragEl = this.closestDraggable(overEl);
-    if (!dragEl) {
-      // the same dropEL
-      if (dropEl === this.dropEl) return;
-
+    // other dropEl
+    if (dropEl !== this.dropEl) {
       this.dropEl = dropEl;
       this.dropEl.appendChild(this.dragEl);
       return;
     }
 
+    const dragEl = this.closestDraggable(overEl);
+    if (!dragEl) return;
+
     // the same dragEl
     if (dragEl === this.dragEl) return;
 
-    // assumption: dragEl.parentNode === dropEl 
+    // other dropEl, it should be the same
+    if (dragEl.parentElement !== this.dropEl ) return;
 
-    if (dropEl !== this.dropEl) {
-      this.dropEl = dropEl;
-    }
-
-    // const otherDragRect = this.getRect(dragEl);
-    const moveDiff = this.startPoint.diff(point);
-    const axis = Math.abs(moveDiff.x) > Math.abs(moveDiff.y) ? 'x' : 'y';
+    const nextEl = dragEl.nextElementSibling;
+    const siblingEl = nextEl || dragEl.previousElementSibling;
+    if (!siblingEl) return;
 
     const dragMidpoint = this.getMidpoint(dragEl);
+    const siblingMidpoint = this.getMidpoint(siblingEl);
+
+    const diff = siblingMidpoint.diff(dragMidpoint);
+    const axis = Math.abs(diff.x) > Math.abs(diff.y) ? 'x' : 'y';
+
     if (point[axis] < dragMidpoint[axis]) {
       this.dropEl.insertBefore(this.dragEl, dragEl);
       return;
     }
 
-    const nextDragEl = dragEl.nextSibling;
-    if (nextDragEl) {
-      this.dropEl.insertBefore(this.dragEl, nextDragEl);
+    if (nextEl) {
+      this.dropEl.insertBefore(this.dragEl, nextEl);
       return;
     }
 
