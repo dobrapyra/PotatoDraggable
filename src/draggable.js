@@ -22,6 +22,7 @@ class PotatoDraggable {
 
     this.eventOptions = this.getEventOptions();
     this.body = document.getElementsByTagName('body')[0];
+    this.scrollEl = document.scrollingElement || document.documentElement || document;
 
     this.bindPassiveEvents();
   }
@@ -157,10 +158,13 @@ class PotatoDraggable {
     this.updateGhostPosition(this.startPoint);
 
     document.body.appendChild(this.ghostEl);
+
+    this.ghostEl.setAttribute('data-pd-ghost', '');
   }
 
   updateGhostPosition(point) {
-    this.ghostEl.style.transform = `translate(${point.x}px, ${point.y}px)`;
+    const newPoint = new Point(this.scrollEl.scrollLeft, this.scrollEl.scrollTop).add(point);
+    this.ghostEl.style.transform = `translate(${newPoint.x}px, ${newPoint.y}px)`;
   }
 
   destroyGhost() {
@@ -175,7 +179,7 @@ class PotatoDraggable {
 
     this.createGhost();
 
-    this.dragEl.style.opacity = 0.5;
+    this.dragEl.setAttribute('data-pd-drag', '');
   }
 
   dragMove(point) {
@@ -198,7 +202,7 @@ class PotatoDraggable {
 
     this.destroyGhost();
 
-    this.dragEl.style.opacity = '';
+    this.dragEl.removeAttribute('data-pd-drag');
     this.dragEl = null;
     this.dropEl = null;
   }

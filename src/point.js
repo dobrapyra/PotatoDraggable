@@ -4,6 +4,16 @@ class Point {
     this.y = y;
   }
 
+  clone() {
+    return new Point(this.x, this.y);
+  }
+
+  add(point) {
+    this.x += point.x;
+    this.y += point.y;
+    return this;
+  }
+
   diff(point) {
     return new Point(point.x - this.x, point.y - this.y);
   }
