@@ -242,21 +242,26 @@ class PotatoDraggable {
     if (!siblingEl) return;
 
     const dragMidpoint = this.getMidpoint(dragEl);
-    const siblingMidpoint = this.getMidpoint(siblingEl);
-
-    const diff = siblingMidpoint.diff(dragMidpoint);
+    const diff = this.getMidpoint(siblingEl).diff(dragMidpoint);
     const axis = Math.abs(diff.x) > Math.abs(diff.y) ? 'x' : 'y';
 
     if (point[axis] < dragMidpoint[axis]) {
+      // prevent unnecessary insert
+      if (this.dragEl.nextElementSibling === dragEl) return;
+
       this.dropEl.insertBefore(this.dragEl, dragEl);
       return;
     }
 
     if (nextEl) {
+      // prevent unnecessary insert
+      if (this.dragEl === nextEl) return;
+
       this.dropEl.insertBefore(this.dragEl, nextEl);
       return;
     }
 
+    // the last in container
     this.dropEl.appendChild(this.dragEl);
   }
 
