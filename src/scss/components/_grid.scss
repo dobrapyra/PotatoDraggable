@@ -1,0 +1,51 @@
+.grid {
+  display: block;
+  height: 100%;
+  width: 100%;
+  padding: 0 4px;
+  white-space: normal;
+
+  &__box {
+    height: 100%;
+    background-color: $cListBg;
+    border: 1px solid $cBorder;
+  }
+
+  &__head {
+    height: 41px;
+    padding: 8px;
+    border-bottom: 1px solid $cBorder;
+
+    &:after {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 0;
+      clear: both;
+    }
+  }
+
+  &__name {
+    display: block;
+    float: left;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  &__body {
+    width: 100%;
+
+    &--scroll {
+      overflow: hidden;
+      overflow-y: auto;
+      height: 200px;
+    }
+  }
+
+  &__items {
+    display: block;
+    padding: 4px 8px;
+    width: 100%;
+    min-height: 80px;
+  }
+}

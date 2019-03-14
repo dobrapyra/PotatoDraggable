@@ -3,6 +3,10 @@
   padding: 9px;
   border: 1px solid $cBorder;
 
+  & + & {
+    margin-top: 10px;
+  }
+
   &__head {
     font-size: 24px;
     line-height: 32px;
@@ -20,6 +24,10 @@
     width: 50%;
     font-size: $baseFontSize;
     border: 1px solid $cBorder;
+
+    @media screen and (max-width: 700px) {
+      width: 100%;
+    }
   }
 
   &__code {
@@ -28,5 +36,10 @@
     width: 50%;
     font-size: 14px;
     padding-left: 20px;
+    
+    @media screen and (max-width: 700px) {
+      width: 100%;
+      padding-left: 0;
+    }
   }
 }
