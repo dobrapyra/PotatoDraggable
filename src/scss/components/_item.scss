@@ -1,6 +1,13 @@
 .item {
   display: block;
   padding: 4px 0;
+
+  &--grid {
+    display: inline-block;
+    vertical-align: top;
+    padding: 4px;
+    width: 80px;
+  }
   
   &__box {
     padding: 8px;
@@ -9,6 +16,7 @@
     font-weight: 600;
     font-size: 14px;
     line-height: 18px;
+    cursor: grab;
   }
 
   $root: &;

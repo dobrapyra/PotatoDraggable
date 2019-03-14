@@ -5,140 +5,336 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>PotatoDraggable</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- <link rel="stylesheet" type="text/css" media="screen" href="./dist/main.css" /> -->
+  <link rel="stylesheet" type="text/css" media="screen" href="./dist/main.css" />
+  <link rel="stylesheet" type="text/css" href="./demo/prism.css" />
 </head>
 <body>
-  <div class="wrapper">
-    <div class="title">Basic single list</div>
-    <div class="list">
-      <div class="list__box">
-        <div class="list__head">
-          <div class="list__name">Basic list</div>
-        </div>
-        <div class="list__body">
-          <div data-pd-drop-container="basic" class="list__items">
-            <div data-pd-draggable-item="basic" class="item">
-              <div class="item__box">Item 1</div>
-            </div>
-            <div data-pd-draggable-item="basic" class="item">
-              <div class="item__box">Item 2</div>
-            </div>
-            <div data-pd-draggable-item="basic" class="item">
-              <div class="item__box">Item 3</div>
-            </div>
-            <div data-pd-draggable-item="basic" class="item">
-              <div class="item__box">Item 4</div>
-            </div>
-            <div data-pd-draggable-item="basic" class="item">
-              <div class="item__box">Item 5</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="wrapper">
-    <div class="title">Single list with vertical scroll</div>
-    <div class="list">
-      <div class="list__box">
-        <div class="list__head">
-          <div class="list__name">List with vertical scroll</div>
-        </div>
-        <div class="list__body list__body--scroll">
-          <div data-pd-drop-container="verticalScroll" class="list__items">
-            <div data-pd-draggable-item="verticalScroll" class="item">
-              <div class="item__box">Item 1</div>
-            </div>
-            <div data-pd-draggable-item="verticalScroll" class="item">
-              <div class="item__box">Item 2</div>
-            </div>
-            <div data-pd-draggable-item="verticalScroll" class="item">
-              <div class="item__box">Item 3</div>
-            </div>
-            <div data-pd-draggable-item="verticalScroll" class="item">
-              <div class="item__box">Item 4</div>
-            </div>
-            <div data-pd-draggable-item="verticalScroll" class="item">
-              <div class="item__box">Item 5</div>
-            </div>
-            <div data-pd-draggable-item="verticalScroll" class="item">
-              <div class="item__box">Item 6</div>
-            </div>
-            <div data-pd-draggable-item="verticalScroll" class="item">
-              <div class="item__box">Item 7</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="wrapper">
-    <div class="title">Multiple lists with horizontal scroll</div>
-    <div class="container">
-      <div class="container__body container__body--scroll">
-        <div class="container__lists">
-          <div class="list">
-            <div class="list__box">
-              <div class="list__head">
-                <div class="list__name">List 1</div>
-              </div>
-              <div class="list__body">
-                <div data-pd-drop-container="item" class="list__items">
-                  <div data-pd-draggable-item="item" class="item">
-                    <div class="item__box">Item 1</div>
-                  </div>
-                  <div data-pd-draggable-item="item" class="item">
-                    <div class="item__box">Item 2</div>
-                  </div>
-                  <div data-pd-draggable-item="item" class="item">
-                    <div class="item__box">Item 3</div>
-                  </div>
-                  <div data-pd-draggable-item="item" class="item">
-                    <div class="item__box">Item 4</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="list">
-            <div class="list__box">
-              <div class="list__head">
-                <div class="list__name">List 2</div>
-              </div>
-              <div class="list__body">
-                <div data-pd-drop-container="item" class="list__items">
-                  <div data-pd-draggable-item="item" class="item">
-                    <div class="item__box">Item 5</div>
-                  </div>
-                  <div data-pd-draggable-item="item" class="item">
-                    <div class="item__box">Item 6</div>
-                  </div>
-                  <div data-pd-draggable-item="item" class="item">
-                    <div class="item__box">Item 7</div>
-                  </div>
-                  <div data-pd-draggable-item="item" class="item">
-                    <div class="item__box">Item 8</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="list">
-            <div class="list__box">
-              <div class="list__head">
-                <div class="list__name">List 3</div>
-              </div>
-              <div class="list__body">
-                <div data-pd-drop-container="item" class="list__items">
 
+  <div class="wrapper">
+
+    <div class="example">
+      <div class="example__head">Basic single list</div>
+      <div class="example__body">
+        <div class="example__demo">
+
+          <div class="container">
+            <div class="container__body">
+              <div class="container__lists">
+
+                <div class="list">
+                  <div class="list__box">
+                    <div class="list__head">
+                      <div class="list__name">Basic list</div>
+                    </div>
+                    <div class="list__body">
+                      <div data-pd-drop-container="basic" class="list__items">
+                        <div data-pd-draggable-item="basic" class="item">
+                          <div class="item__box">Item 1</div>
+                        </div>
+                        <div data-pd-draggable-item="basic" class="item">
+                          <div class="item__box">Item 2</div>
+                        </div>
+                        <div data-pd-draggable-item="basic" class="item">
+                          <div class="item__box">Item 3</div>
+                        </div>
+                        <div data-pd-draggable-item="basic" class="item">
+                          <div class="item__box">Item 4</div>
+                        </div>
+                        <div data-pd-draggable-item="basic" class="item">
+                          <div class="item__box">Item 5</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
               </div>
             </div>
           </div>
+
+        </div>
+        <div class="example__code">
+          <pre>
+<code class="language-html"><!--
+-->
+&lt;div data-pd-drop-container="basic" class="list__items"&gt;
+  &lt;div data-pd-draggable-item="basic" class="item"&gt;
+    &lt;div class="item__box"&gt;Item 1&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div data-pd-draggable-item="basic" class="item"&gt;
+    &lt;div class="item__box"&gt;Item 2&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;!-- more items with [data-pd-draggable-item="basic"] --&gt;
+&lt;/div&gt;<!--
+--></code>
+          </pre>
         </div>
       </div>
     </div>
+
+    <div class="example">
+      <div class="example__head">Single list with vertical scroll</div>
+      <div class="example__body">
+        <div class="example__demo">
+
+          <div class="container">
+            <div class="container__body container__body--scroll">
+              <div class="container__lists">
+
+                <div class="list">
+                  <div class="list__box">
+                    <div class="list__head">
+                      <div class="list__name">List with vertical scroll</div>
+                    </div>
+                    <div class="list__body list__body--scroll">
+                      <div data-pd-drop-container="verticalScroll" class="list__items">
+                        <div data-pd-draggable-item="verticalScroll" class="item">
+                          <div class="item__box">Item 1</div>
+                        </div>
+                        <div data-pd-draggable-item="verticalScroll" class="item">
+                          <div class="item__box">Item 2</div>
+                        </div>
+                        <div data-pd-draggable-item="verticalScroll" class="item">
+                          <div class="item__box">Item 3</div>
+                        </div>
+                        <div data-pd-draggable-item="verticalScroll" class="item">
+                          <div class="item__box">Item 4</div>
+                        </div>
+                        <div data-pd-draggable-item="verticalScroll" class="item">
+                          <div class="item__box">Item 5</div>
+                        </div>
+                        <div data-pd-draggable-item="verticalScroll" class="item">
+                          <div class="item__box">Item 6</div>
+                        </div>
+                        <div data-pd-draggable-item="verticalScroll" class="item">
+                          <div class="item__box">Item 7</div>
+                        </div>
+                        <div data-pd-draggable-item="verticalScroll" class="item">
+                          <div class="item__box">Item 8</div>
+                        </div>
+                        <div data-pd-draggable-item="verticalScroll" class="item">
+                          <div class="item__box">Item 9</div>
+                        </div>
+                        <div data-pd-draggable-item="verticalScroll" class="item">
+                          <div class="item__box">Item 10</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="example__code">
+          <pre>
+<code class="language-html"><!--
+-->
+&lt;div data-pd-drop-container="verticalScroll" class="list__items"&gt;
+  &lt;div data-pd-draggable-item="verticalScroll" class="item"&gt;
+    &lt;div class="item__box"&gt;Item 1&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div data-pd-draggable-item="verticalScroll" class="item"&gt;
+    &lt;div class="item__box"&gt;Item 2&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;!-- more items with [data-pd-draggable-item="verticalScroll"] --&gt;
+&lt;/div&gt;<!--
+--></code>
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="example">
+      <div class="example__head">Multiple lists with horizontal scroll</div>
+      <div class="example__body">
+        <div class="example__demo">
+
+          <div class="container">
+            <div class="container__body container__body--scroll">
+              <div class="container__lists">
+
+                <div class="list">
+                  <div class="list__box">
+                    <div class="list__head">
+                      <div class="list__name">List 1</div>
+                    </div>
+                    <div class="list__body">
+                      <div data-pd-drop-container="item" class="list__items">
+                        <div data-pd-draggable-item="item" class="item">
+                          <div class="item__box">Item 1</div>
+                        </div>
+                        <div data-pd-draggable-item="item" class="item">
+                          <div class="item__box">Item 2</div>
+                        </div>
+                        <div data-pd-draggable-item="item" class="item">
+                          <div class="item__box">Item 3</div>
+                        </div>
+                        <div data-pd-draggable-item="item" class="item">
+                          <div class="item__box">Item 4</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="list">
+                  <div class="list__box">
+                    <div class="list__head">
+                      <div class="list__name">List 2</div>
+                    </div>
+                    <div class="list__body">
+                      <div data-pd-drop-container="item" class="list__items">
+                        <div data-pd-draggable-item="item" class="item">
+                          <div class="item__box">Item 5</div>
+                        </div>
+                        <div data-pd-draggable-item="item" class="item">
+                          <div class="item__box">Item 6</div>
+                        </div>
+                        <div data-pd-draggable-item="item" class="item">
+                          <div class="item__box">Item 7</div>
+                        </div>
+                        <div data-pd-draggable-item="item" class="item">
+                          <div class="item__box">Item 8</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="list">
+                  <div class="list__box">
+                    <div class="list__head">
+                      <div class="list__name">List 3</div>
+                    </div>
+                    <div class="list__body">
+                      <div data-pd-drop-container="item" class="list__items">
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="example__code">
+          <pre>
+<code class="language-html"><!--
+-->
+&lt;!-- first list with [data-pd-drop-container="item"] --&gt;
+&lt;div data-pd-drop-container="item" class="list__items"&gt;
+  &lt;div data-pd-draggable-item="item" class="item"&gt;
+    &lt;div class="item__box"&gt;Item 1&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div data-pd-draggable-item="item" class="item"&gt;
+    &lt;div class="item__box"&gt;Item 2&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;!-- more items with [data-pd-draggable-item="item"] --&gt;
+&lt;/div&gt;
+
+&lt;!-- second list with [data-pd-drop-container="item"] --&gt;
+&lt;div data-pd-drop-container="item" class="list__items"&gt;
+  &lt;div data-pd-draggable-item="item" class="item"&gt;
+    &lt;div class="item__box"&gt;Item 5&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;!-- more items with [data-pd-draggable-item="item"] --&gt;
+&lt;/div&gt;
+
+&lt;!-- more lists with [data-pd-drop-container="item"] --&gt;<!--
+--></code>
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="example">
+      <div class="example__head">Basic single grid</div>
+      <div class="example__body">
+        <div class="example__demo">
+
+          <div class="container">
+            <div class="container__body">
+              <div class="container__lists">
+
+                <div class="grid">
+                  <div class="grid__box">
+                    <div class="grid__head">
+                      <div class="grid__name">Basic grid</div>
+                    </div>
+                    <div class="grid__body">
+                      <div data-pd-drop-container="basicGrid" class="grid__items">
+                        <div data-pd-draggable-item="basicGrid" class="item item--grid">
+                          <div class="item__box">Item 1</div>
+                        </div>
+                        <div data-pd-draggable-item="basicGrid" class="item item--grid">
+                          <div class="item__box">Item 2</div>
+                        </div>
+                        <div data-pd-draggable-item="basicGrid" class="item item--grid">
+                          <div class="item__box">Item 3</div>
+                        </div>
+                        <div data-pd-draggable-item="basicGrid" class="item item--grid">
+                          <div class="item__box">Item 4</div>
+                        </div>
+                        <div data-pd-draggable-item="basicGrid" class="item item--grid">
+                          <div class="item__box">Item 5</div>
+                        </div>
+                        <div data-pd-draggable-item="basicGrid" class="item item--grid">
+                          <div class="item__box">Item 6</div>
+                        </div>
+                        <div data-pd-draggable-item="basicGrid" class="item item--grid">
+                          <div class="item__box">Item 7</div>
+                        </div>
+                        <div data-pd-draggable-item="basicGrid" class="item item--grid">
+                          <div class="item__box">Item 8</div>
+                        </div>
+                        <div data-pd-draggable-item="basicGrid" class="item item--grid">
+                          <div class="item__box">Item 9</div>
+                        </div>
+                        <div data-pd-draggable-item="basicGrid" class="item item--grid">
+                          <div class="item__box">Item 10</div>
+                        </div>
+                        <div data-pd-draggable-item="basicGrid" class="item item--grid">
+                          <div class="item__box">Item 11</div>
+                        </div>
+                        <div data-pd-draggable-item="basicGrid" class="item item--grid">
+                          <div class="item__box">Item 12</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="example__code">
+          <pre>
+<code class="language-html"><!--
+-->
+&lt;div data-pd-drop-container="basicGrid" class="grid__items"&gt;
+  &lt;div data-pd-draggable-item="basicGrid" class="item item--grid"&gt;
+    &lt;div class="item__box"&gt;Item 1&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div data-pd-draggable-item="basicGrid" class="item item--grid"&gt;
+    &lt;div class="item__box"&gt;Item 2&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;!-- more items with [data-pd-draggable-item="basicGrid"] --&gt;
+&lt;/div&gt;<!--
+--></code>
+          </pre>
+        </div>
+      </div>
+    </div>
+
   </div>
   <script src="./dist/main.js"></script>
+  <script src="./demo/prism.js"></script>
 </body>
 </html>

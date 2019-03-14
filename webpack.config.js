@@ -1,7 +1,6 @@
-/* global require module __dirname process */
-var path = require('path');
-var MiniCssExtractPlugin = require('mini-css-extract-plugin');
-var devMode = process.env.NODE_ENV !== 'production';
+/* global require module __dirname */
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const path = require('path');
 
 module.exports = {
   mode: 'development',
@@ -9,7 +8,8 @@ module.exports = {
   entry: './src/main.js',
   output: {
     path: path.resolve(__dirname, './dist'),
-    filename: 'main.js'
+    filename: 'main.js',
+    // publicPath: './dist'
   },
   module: {
     rules: [
@@ -24,9 +24,10 @@ module.exports = {
         }
       },
       {
-        test: /\.scss$/,
+        test: /\.s?css$/,
         use: [
-          devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+          MiniCssExtractPlugin.loader,
+          // 'style-loader',
           'css-loader',
           'sass-loader'
         ]
@@ -35,7 +36,6 @@ module.exports = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      path: path.resolve(__dirname, './dist'),
       filename: 'main.css'
     })
   ]
