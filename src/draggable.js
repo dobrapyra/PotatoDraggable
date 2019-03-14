@@ -4,6 +4,7 @@ class PotatoDraggable {
   constructor() {
     this.draggableAttr = 'data-pd-draggable-item';
     this.containerAttr = 'data-pd-drop-container';
+    this.duration = 300;
 
     this.dragEl = null;
     this.dropEl = null;
@@ -52,7 +53,13 @@ class PotatoDraggable {
   }
 
   getRect(el) {
-    return el.getBoundingClientRect();
+    const rect = el.getBoundingClientRect();
+    return {
+      x: rect.x || rect.left,
+      y: rect.y || rect.top,
+      width: rect.width,
+      height: rect.height,
+    };
   }
 
   getMidpoint(el) {
@@ -60,8 +67,36 @@ class PotatoDraggable {
     return new Point(elRect.width / 2 + elRect.x, elRect.height / 2 + elRect.y);
   }
 
+  getRectDiff(el, elRect) {
+    const rect = this.getRect(el);
+    return {
+      x: elRect.x - rect.x,
+      y: elRect.y - rect.y,
+      width: elRect.width - rect.width,
+      height: elRect.height - rect.height,
+    };
+  }
+
   pointToEl(point) {
     return document.elementFromPoint(point.x, point.y);
+  }
+
+  each(array, fn) {
+    const length = array.length;
+    for (let i = 0; i < length; i++) {
+      const result = fn(array[i], i);
+      if (result === true) continue;
+      if (result === false) break;
+    }
+  }
+
+  eachInContainers(containers, dropElFn, dragElFn) {
+    this.each(containers, container => {
+      dropElFn(container);
+      this.each(container.children, el => {
+        dragElFn(el);
+      });
+    });
   }
 
   closest(el, match) {
@@ -180,6 +215,10 @@ class PotatoDraggable {
     this.ghostEl.style.height = `${dragElRect.height}px`;
     this.ghostEl.style.pointerEvents = 'none';
 
+    // reset after animation
+    this.ghostEl.style.transition = '';
+    this.ghostEl.style.transform = '';
+
     this.updateGhostPosition(this.startPoint);
 
     this.body.appendChild(this.ghostEl);
@@ -207,6 +246,11 @@ class PotatoDraggable {
 
     this.createGhost();
 
+    // reset after animation
+    this.dropEl.style.transition = '';
+    this.dropEl.style.height = '';
+    this.dropEl.style.width = '';
+
     this.dragEl.setAttribute('data-pd-drag', '');
   }
 
@@ -223,8 +267,12 @@ class PotatoDraggable {
 
     // other dropEl
     if (dropEl !== this.dropEl) {
+      const prevDropEl = this.dropEl;
       this.dropEl = dropEl;
+
+      this.beforeSwap([dropEl, prevDropEl]);
       this.dropEl.appendChild(this.dragEl);
+      this.afterSwap([dropEl, prevDropEl]);
       return;
     }
 
@@ -249,7 +297,9 @@ class PotatoDraggable {
       // prevent unnecessary insert
       if (this.dragEl.nextElementSibling === dragEl) return;
 
+      this.beforeSwap([dropEl]);
       this.dropEl.insertBefore(this.dragEl, dragEl);
+      this.afterSwap([dropEl]);
       return;
     }
 
@@ -257,12 +307,16 @@ class PotatoDraggable {
       // prevent unnecessary insert
       if (this.dragEl === nextEl) return;
 
+      this.beforeSwap([dropEl]);
       this.dropEl.insertBefore(this.dragEl, nextEl);
+      this.afterSwap([dropEl]);
       return;
     }
 
     // the last in container
+    this.beforeSwap([dropEl]);
     this.dropEl.appendChild(this.dragEl);
+    this.afterSwap([dropEl]);
   }
 
   dragEnd() {
@@ -277,6 +331,74 @@ class PotatoDraggable {
     this.dragEl.removeAttribute('data-pd-drag');
     this.dragEl = null;
     this.dropEl = null;
+  }
+
+  beforeSwap(containers) {
+    const getRect = this.getRect.bind(this);
+    this.eachInContainers(containers, dropEl => {
+      dropEl._pd_elRect = getRect(dropEl);
+    }, dragEl => {
+      dragEl._pd_elRect = getRect(dragEl);
+    });
+  }
+
+  afterSwap(containers) {
+    const getRectDiff = this.getRectDiff.bind(this), getRect = this.getRect.bind(this);
+
+    clearTimeout(this.animationTimeout);
+
+    this.eachInContainers(containers, dropEl => {
+      const elRect = getRect(dropEl);
+      dropEl.style.transition = 'none';
+      if (elRect.height !== dropEl._pd_elRect.height) {
+        dropEl.style.height = `${dropEl._pd_elRect.height}px`;
+        dropEl._pd_animation = true;
+      }
+      if (elRect.width !== dropEl._pd_elRect.width) {
+        dropEl.style.width = `${dropEl._pd_elRect.width}px`;
+        dropEl._pd_animation = true;
+      }
+      dropEl._pd_elRect = elRect;
+    }, dragEl => {
+      if (!dragEl._pd_elRect) return true;
+      const elRectDiff = getRectDiff(dragEl, dragEl._pd_elRect);
+      dragEl.style.transition = 'none';
+      if (elRectDiff.y !== 0 || elRectDiff.x !== 0) {
+        dragEl.style.transform = `translate(${elRectDiff.x}px, ${elRectDiff.y}px)`;
+        dragEl._pd_animation = true;
+      }
+      dragEl._pd_elRect = undefined;
+    });
+
+    this.dropEl.offsetWidth; // force reflow
+
+    this.eachInContainers(containers, dropEl => {
+
+      if (dropEl._pd_animation) {
+        dropEl.style.transition = `height ${this.duration}ms ease-out, width ${this.duration}ms ease-out`;
+        dropEl.style.height = `${dropEl._pd_elRect.height}px`;
+        dropEl.style.width = `${dropEl._pd_elRect.width}px`;
+        dropEl._pd_animation = undefined;
+      }
+      dropEl._pd_elRect = undefined;
+    }, dragEl => {
+      if (dragEl._pd_animation) {
+        dragEl.style.transition = `transform ${this.duration}ms ease-out`;
+        dragEl.style.transform = 'translate(0, 0)';
+        dragEl._pd_animation = undefined;
+      }
+    });
+
+    this.animationTimeout = setTimeout(() => {
+      this.eachInContainers(containers, dropEl => {
+        dropEl.style.transition = '';
+        dropEl.style.height = '';
+        dropEl.style.width = '';
+      }, dragEl => {
+        dragEl.style.transition = '';
+        dragEl.style.transform = '';
+      });
+    }, this.duration);
   }
 }
 
