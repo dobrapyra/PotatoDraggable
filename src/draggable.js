@@ -190,7 +190,10 @@ class PotatoDraggable {
       if (this.startPoint.checkAxisOffset(point, 4)) {
         clearTimeout(this.touchTimeout);
         this.unbindActiveEvents();
+        this.dragEnd();
+        return;
       }
+
       this.movePoint = point;
       return;
     }
@@ -201,11 +204,13 @@ class PotatoDraggable {
 
   onTouchEnd() {
     clearTimeout(this.touchTimeout);
-    this.dragEnd();
     this.unbindActiveEvents();
+    this.dragEnd();
   }
 
   createGhost() {
+    if (this.dragEl === null) return;
+
     const dragElRect = this.getRect(this.dragEl);
     this.ghostEl = this.dragEl.cloneNode(true);
     this.ghostEl.style.position = 'absolute';
@@ -232,7 +237,11 @@ class PotatoDraggable {
   }
 
   destroyGhost() {
+    if (this.ghostEl === null) return;
+
     this.body.removeChild(this.ghostEl);
+
+    this.ghostEl = null;
   }
 
   dragStart() {    
@@ -335,6 +344,7 @@ class PotatoDraggable {
 
   beforeSwap(containers) {
     const getRect = this.getRect.bind(this);
+
     this.eachInContainers(containers, dropEl => {
       dropEl._pd_elRect = getRect(dropEl);
     }, dragEl => {
@@ -373,7 +383,6 @@ class PotatoDraggable {
     this.dropEl.offsetWidth; // force reflow
 
     this.eachInContainers(containers, dropEl => {
-
       if (dropEl._pd_animation) {
         dropEl.style.transition = `height ${this.duration}ms ease-out, width ${this.duration}ms ease-out`;
         dropEl.style.height = `${dropEl._pd_elRect.height}px`;
