@@ -22,11 +22,10 @@ class PotatoDraggable {
     this.startPoint = null;
     this.movePoint = null;
 
-    
     this.onTouchStart = this.onTouchStart.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
-    
+
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
@@ -34,7 +33,7 @@ class PotatoDraggable {
     this.onDragTimeout = this.onDragTimeout.bind(this);
 
     this.eventOptions = this.getEventOptions();
-    
+
     this.body = document.body;
     this.scrollEl = document.scrollingElement || document.documentElement || document;
 
@@ -160,7 +159,7 @@ class PotatoDraggable {
   onMouseDown(e) {
     this.onDragStart(e, 'mouse');
   }
-  
+
   onMouseMove(e) {
     this.onDragMove(e, 'mouse');
   }
@@ -255,7 +254,7 @@ class PotatoDraggable {
     this.ghostEl = null;
   }
 
-  dragStart() {    
+  dragStart() {
     this.groupId = this.dragEl.getAttribute(this.draggableAttr);
     if (this.groupId === null) return; // probably not necessary
 
