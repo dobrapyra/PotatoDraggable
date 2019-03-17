@@ -5,6 +5,11 @@ class PotatoDraggable {
     this.draggableAttr = 'data-pd-draggable-item';
     this.containerAttr = 'data-pd-drop-container';
     this.duration = 300;
+    this.dragDelay = {
+      mouse: 0,
+      touch: 200,
+    };
+    this.cancelThreshold = 4;
 
     this.dragEl = null;
     this.dropEl = null;
@@ -17,7 +22,6 @@ class PotatoDraggable {
     this.startPoint = null;
     this.movePoint = null;
 
-    this.onTouchTimeout = this.onTouchTimeout.bind(this);
     this.onTouchStart = this.onTouchStart.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
@@ -26,7 +30,10 @@ class PotatoDraggable {
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
 
+    this.onDragTimeout = this.onDragTimeout.bind(this);
+
     this.eventOptions = this.getEventOptions();
+
     this.body = document.body;
     this.scrollEl = document.scrollingElement || document.documentElement || document;
 
@@ -122,55 +129,62 @@ class PotatoDraggable {
     return this.closestByAttr(el, this.draggableAttr, groupId);
   }
 
+  addEvent(eventName, eventFunction) {
+    document.addEventListener(eventName, eventFunction, this.eventOptions);
+  }
+
+  removeEvent(eventName, eventFunction) {
+    document.removeEventListener(eventName, eventFunction, this.eventOptions);
+  }
+
   bindPassiveEvents() {
-    document.addEventListener('mousedown', this.onMouseDown, this.eventOptions);
-    document.addEventListener('touchstart', this.onTouchStart, this.eventOptions);
+    this.addEvent('mousedown', this.onMouseDown);
+    this.addEvent('touchstart', this.onTouchStart);
   }
 
   bindActiveEvents() {
-    document.addEventListener('mousemove', this.onMouseMove, this.eventOptions);
-    document.addEventListener('mouseup', this.onMouseUp, this.eventOptions);
-    document.addEventListener('touchmove', this.onTouchMove, this.eventOptions);
-    document.addEventListener('touchend', this.onTouchEnd, this.eventOptions);
+    this.addEvent('mousemove', this.onMouseMove);
+    this.addEvent('mouseup', this.onMouseUp);
+    this.addEvent('touchmove', this.onTouchMove);
+    this.addEvent('touchend', this.onTouchEnd);
   }
 
   unbindActiveEvents() {
-    document.removeEventListener('mousemove', this.onMouseMove, this.eventOptions);
-    document.removeEventListener('mouseup', this.onMouseUp, this.eventOptions);
-    document.removeEventListener('touchmove', this.onTouchMove, this.eventOptions);
-    document.removeEventListener('touchend', this.onTouchEnd, this.eventOptions);
+    this.removeEvent('mousemove', this.onMouseMove);
+    this.removeEvent('mouseup', this.onMouseUp);
+    this.removeEvent('touchmove', this.onTouchMove);
+    this.removeEvent('touchend', this.onTouchEnd);
   }
 
   onMouseDown(e) {
-    const point = this.getPoint(e);
-
-    const dragEl = this.closestDraggable(this.pointToEl(point));
-    if (!dragEl) return;
-
-    this.dragEl = dragEl;
-    this.startPoint = point;
-
-    this.bindActiveEvents();
-    this.dragStart(point);
+    this.onDragStart(e, 'mouse');
   }
 
   onMouseMove(e) {
-    const point = this.getPoint(e);
-
-    e.preventDefault();
-    this.dragMove(point);
+    this.onDragMove(e, 'mouse');
   }
 
-  onMouseUp() {
-    this.dragEnd();
-    this.unbindActiveEvents();
-  }
-
-  onTouchTimeout() {
-    this.dragStart(this.startPoint);
+  onMouseUp(e) {
+    this.onDragEnd(e, 'mouse');
   }
 
   onTouchStart(e) {
+    this.onDragStart(e, 'touch');
+  }
+
+  onTouchMove(e) {
+    this.onDragMove(e, 'touch');
+  }
+
+  onTouchEnd(e) {
+    this.onDragEnd(e, 'touch');
+  }
+
+  onDragTimeout() {
+    this.dragStart();
+  }
+
+  onDragStart(e, type) {
     const point = this.getPoint(e);
 
     const dragEl = this.closestDraggable(this.pointToEl(point));
@@ -180,30 +194,26 @@ class PotatoDraggable {
     this.startPoint = point;
 
     this.bindActiveEvents();
-    this.touchTimeout = setTimeout(this.onTouchTimeout, 200);
+    this.dragTimeout = setTimeout(this.onDragTimeout, this.dragDelay[type]);
   }
 
-  onTouchMove(e) {
-    const point = this.getPoint(e);
+  onDragMove(e) {
+    this.movePoint = this.getPoint(e);
 
     if (!this.dragging) {
-      if (this.startPoint.checkAxisOffset(point, 4)) {
-        clearTimeout(this.touchTimeout);
-        this.unbindActiveEvents();
-        this.dragEnd();
-        return;
+      if (this.startPoint.checkAxisOffset(this.movePoint, this.cancelThreshold)) {
+        this.onDragEnd(e);
       }
 
-      this.movePoint = point;
       return;
     }
 
     e.preventDefault();
-    this.dragMove(point);
+    this.dragMove();
   }
 
-  onTouchEnd() {
-    clearTimeout(this.touchTimeout);
+  onDragEnd() {
+    clearTimeout(this.dragTimeout);
     this.unbindActiveEvents();
     this.dragEnd();
   }
@@ -244,7 +254,7 @@ class PotatoDraggable {
     this.ghostEl = null;
   }
 
-  dragStart() {    
+  dragStart() {
     this.groupId = this.dragEl.getAttribute(this.draggableAttr);
     if (this.groupId === null) return; // probably not necessary
 
@@ -263,10 +273,10 @@ class PotatoDraggable {
     this.dragEl.setAttribute('data-pd-drag', '');
   }
 
-  dragMove(point) {
-    this.updateGhostPosition(point);
+  dragMove() {
+    this.updateGhostPosition(this.movePoint);
 
-    const overEl = this.pointToEl(point);
+    const overEl = this.pointToEl(this.movePoint);
 
     const dropEl = this.closestContainer(overEl, this.groupId);
     if (!dropEl) return;
@@ -302,7 +312,7 @@ class PotatoDraggable {
     const diff = this.getMidpoint(siblingEl).diff(dragMidpoint);
     const axis = Math.abs(diff.x) > Math.abs(diff.y) ? 'x' : 'y';
 
-    if (point[axis] < dragMidpoint[axis]) {
+    if (this.movePoint[axis] < dragMidpoint[axis]) {
       // prevent unnecessary insert
       if (this.dragEl.nextElementSibling === dragEl) return;
 

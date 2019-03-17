@@ -24,6 +24,16 @@ module.exports = {
     "semi": [
       "error",
       "always"
+    ],
+    "no-trailing-spaces": [
+      "error"
+    ],
+    "no-multiple-empty-lines": [
+      "error", { "max": 1 }
+    ],
+    "eol-last": [
+      "error",
+      "always"
     ]
   }
 };
