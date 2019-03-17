@@ -5,10 +5,10 @@
   "main": "src/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack",
-    "watch": "webpack --watch",
-    "serve": "http-server . -p 4000 -o",
-    "production": "webpack -p"
+    "build": "webpack --mode=development",
+    "watch": "webpack --mode=development --watch",
+    "production": "webpack --mode=production -p",
+    "serve": "http-server . -p 4000 -o"
   },
   "author": "dobrapyra",
   "license": "ISC",
