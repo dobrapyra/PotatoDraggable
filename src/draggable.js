@@ -13,14 +13,17 @@ class PotatoDraggable {
 
     this.dragEl = null;
     this.dropEl = null;
+    this.swapEl = null;
     this.ghostEl = null;
 
+    this.swapDir = 0;
     this.groupId = '';
 
     this.dragging = false;
     this.touchTimeout = null;
     this.startPoint = null;
     this.movePoint = null;
+    this.swapPoint = null;
 
     this.onTouchStart = this.onTouchStart.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
@@ -69,11 +72,6 @@ class PotatoDraggable {
     };
   }
 
-  getMidpoint(el) {
-    const elRect = this.getRect(el);
-    return new Point(elRect.width / 2 + elRect.x, elRect.height / 2 + elRect.y);
-  }
-
   getRectDiff(el, elRect) {
     const rect = this.getRect(el);
     return {
@@ -86,6 +84,15 @@ class PotatoDraggable {
 
   pointToEl(point) {
     return document.elementFromPoint(point.x, point.y);
+  }
+
+  getIndex(el) {
+    let index = -1;
+    for (;el;) {
+      index++;
+      el = el.previousElementSibling;
+    }
+    return index;
   }
 
   each(array, fn) {
@@ -192,12 +199,14 @@ class PotatoDraggable {
 
     this.dragEl = dragEl;
     this.startPoint = point;
+    this.movePoint = point;
 
     this.bindActiveEvents();
     this.dragTimeout = setTimeout(this.onDragTimeout, this.dragDelay[type]);
   }
 
   onDragMove(e) {
+    this.swapPoint = this.movePoint;
     this.movePoint = this.getPoint(e);
 
     if (!this.dragging) {
@@ -304,15 +313,16 @@ class PotatoDraggable {
     // other dropEl, it should be the same
     if (dragEl.parentElement !== this.dropEl ) return;
 
-    const nextEl = dragEl.nextElementSibling;
-    const siblingEl = nextEl || dragEl.previousElementSibling;
-    if (!siblingEl) return;
+    const rectDiff = this.getRectDiff(this.dragEl, this.getRect(dragEl));
+    const axis = Math.abs(rectDiff.x) > Math.abs(rectDiff.y) ? 'x' : 'y';
+    const diff = this.swapPoint.diff(this.movePoint);
+    const dir = Math.abs(diff[axis]) / diff[axis];
+    if (dragEl === this.swapEl && this.swapDir === dir) return;
 
-    const dragMidpoint = this.getMidpoint(dragEl);
-    const diff = this.getMidpoint(siblingEl).diff(dragMidpoint);
-    const axis = Math.abs(diff.x) > Math.abs(diff.y) ? 'x' : 'y';
+    this.swapEl = dragEl;
+    this.swapDir = dir;
 
-    if (this.movePoint[axis] < dragMidpoint[axis]) {
+    if (this.getIndex(dragEl) < this.getIndex(this.dragEl)) {
       // prevent unnecessary insert
       if (this.dragEl.nextElementSibling === dragEl) return;
 
@@ -321,6 +331,8 @@ class PotatoDraggable {
       this.afterSwap([dropEl]);
       return;
     }
+
+    const nextEl = dragEl.nextElementSibling;
 
     if (nextEl) {
       // prevent unnecessary insert
@@ -342,7 +354,9 @@ class PotatoDraggable {
     this.dragging = false;
     this.startPoint = null;
     this.movePoint = null;
+    this.swapPoint = null;
 
+    this.swapDir = 0;
     this.groupId = '';
 
     this.destroyGhost();
@@ -350,6 +364,7 @@ class PotatoDraggable {
     this.dragEl.removeAttribute('data-pd-drag');
     this.dragEl = null;
     this.dropEl = null;
+    this.swapEl = null;
   }
 
   beforeSwap(containers) {
@@ -383,6 +398,7 @@ class PotatoDraggable {
       if (!dragEl._pd_elRect) return true;
       const elRectDiff = getRectDiff(dragEl, dragEl._pd_elRect);
       dragEl.style.transition = 'none';
+      // dragEl.style.pointerEvents = '';
       if (elRectDiff.y !== 0 || elRectDiff.x !== 0) {
         dragEl.style.transform = `translate(${elRectDiff.x}px, ${elRectDiff.y}px)`;
         dragEl._pd_animation = true;
@@ -404,6 +420,7 @@ class PotatoDraggable {
       if (dragEl._pd_animation) {
         dragEl.style.transition = `transform ${this.duration}ms ease-out`;
         dragEl.style.transform = 'translate(0, 0)';
+        // dragEl.style.pointerEvents = 'none';
         dragEl._pd_animation = undefined;
       }
     });
@@ -416,6 +433,7 @@ class PotatoDraggable {
       }, dragEl => {
         dragEl.style.transition = '';
         dragEl.style.transform = '';
+        // dragEl.style.pointerEvents = '';
       });
     }, this.duration);
   }
