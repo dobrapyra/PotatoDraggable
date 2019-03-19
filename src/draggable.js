@@ -13,14 +13,17 @@ class PotatoDraggable {
 
     this.dragEl = null;
     this.dropEl = null;
+    this.swapEl = null;
     this.ghostEl = null;
 
+    this.swapDir = 0;
     this.groupId = '';
 
     this.dragging = false;
     this.touchTimeout = null;
     this.startPoint = null;
     this.movePoint = null;
+    this.swapPoint = null;
 
     this.onTouchStart = this.onTouchStart.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
@@ -31,6 +34,13 @@ class PotatoDraggable {
     this.onMouseUp = this.onMouseUp.bind(this);
 
     this.onDragTimeout = this.onDragTimeout.bind(this);
+
+    this.beforeDropElAnim = this.beforeDropElAnim.bind(this);
+    this.beforeDragElAnim = this.beforeDragElAnim.bind(this);
+    this.prepareDropElAnim = this.prepareDropElAnim.bind(this);
+    this.prepareDragElAnim = this.prepareDragElAnim.bind(this);
+    this.startDropElAnim = this.startDropElAnim.bind(this);
+    this.startDragElAnim = this.startDragElAnim.bind(this);
 
     this.eventOptions = this.getEventOptions();
 
@@ -69,11 +79,6 @@ class PotatoDraggable {
     };
   }
 
-  getMidpoint(el) {
-    const elRect = this.getRect(el);
-    return new Point(elRect.width / 2 + elRect.x, elRect.height / 2 + elRect.y);
-  }
-
   getRectDiff(el, elRect) {
     const rect = this.getRect(el);
     return {
@@ -88,6 +93,15 @@ class PotatoDraggable {
     return document.elementFromPoint(point.x, point.y);
   }
 
+  getIndex(el) {
+    let index = -1;
+    for (;el;) {
+      index++;
+      el = el.previousElementSibling;
+    }
+    return index;
+  }
+
   each(array, fn) {
     const length = array.length;
     for (let i = 0; i < length; i++) {
@@ -97,11 +111,11 @@ class PotatoDraggable {
     }
   }
 
-  eachInContainers(containers, dropElFn, dragElFn) {
-    this.each(containers, container => {
-      dropElFn(container);
-      this.each(container.children, el => {
-        dragElFn(el);
+  eachInDropArr(dropArr, dropElFn, dragElFn) {
+    this.each(dropArr, dropEl => {
+      dropElFn(dropEl);
+      this.each(dropEl.children, dragEl => {
+        dragElFn(dragEl);
       });
     });
   }
@@ -192,12 +206,14 @@ class PotatoDraggable {
 
     this.dragEl = dragEl;
     this.startPoint = point;
+    this.movePoint = point;
 
     this.bindActiveEvents();
     this.dragTimeout = setTimeout(this.onDragTimeout, this.dragDelay[type]);
   }
 
   onDragMove(e) {
+    this.swapPoint = this.movePoint;
     this.movePoint = this.getPoint(e);
 
     if (!this.dragging) {
@@ -304,15 +320,16 @@ class PotatoDraggable {
     // other dropEl, it should be the same
     if (dragEl.parentElement !== this.dropEl ) return;
 
-    const nextEl = dragEl.nextElementSibling;
-    const siblingEl = nextEl || dragEl.previousElementSibling;
-    if (!siblingEl) return;
+    const rectDiff = this.getRectDiff(this.dragEl, this.getRect(dragEl));
+    const axis = Math.abs(rectDiff.x) > Math.abs(rectDiff.y) ? 'x' : 'y';
+    const diff = this.swapPoint.diff(this.movePoint);
+    const dir = Math.abs(diff[axis]) / diff[axis];
+    if (dragEl === this.swapEl && this.swapDir === dir) return;
 
-    const dragMidpoint = this.getMidpoint(dragEl);
-    const diff = this.getMidpoint(siblingEl).diff(dragMidpoint);
-    const axis = Math.abs(diff.x) > Math.abs(diff.y) ? 'x' : 'y';
+    this.swapEl = dragEl;
+    this.swapDir = dir;
 
-    if (this.movePoint[axis] < dragMidpoint[axis]) {
+    if (this.getIndex(dragEl) < this.getIndex(this.dragEl)) {
       // prevent unnecessary insert
       if (this.dragEl.nextElementSibling === dragEl) return;
 
@@ -321,6 +338,8 @@ class PotatoDraggable {
       this.afterSwap([dropEl]);
       return;
     }
+
+    const nextEl = dragEl.nextElementSibling;
 
     if (nextEl) {
       // prevent unnecessary insert
@@ -342,7 +361,9 @@ class PotatoDraggable {
     this.dragging = false;
     this.startPoint = null;
     this.movePoint = null;
+    this.swapPoint = null;
 
+    this.swapDir = 0;
     this.groupId = '';
 
     this.destroyGhost();
@@ -350,74 +371,96 @@ class PotatoDraggable {
     this.dragEl.removeAttribute('data-pd-drag');
     this.dragEl = null;
     this.dropEl = null;
+    this.swapEl = null;
   }
 
-  beforeSwap(containers) {
-    const getRect = this.getRect.bind(this);
-
-    this.eachInContainers(containers, dropEl => {
-      dropEl._pd_elRect = getRect(dropEl);
-    }, dragEl => {
-      dragEl._pd_elRect = getRect(dragEl);
-    });
+  beforeSwap(dropArr) {
+    this.eachInDropArr(dropArr, this.beforeDropElAnim, this.beforeDragElAnim);
   }
 
-  afterSwap(containers) {
-    const getRectDiff = this.getRectDiff.bind(this), getRect = this.getRect.bind(this);
-
-    clearTimeout(this.animationTimeout);
-
-    this.eachInContainers(containers, dropEl => {
-      const elRect = getRect(dropEl);
-      dropEl.style.transition = 'none';
-      if (elRect.height !== dropEl._pd_elRect.height) {
-        dropEl.style.height = `${dropEl._pd_elRect.height}px`;
-        dropEl._pd_animation = true;
-      }
-      if (elRect.width !== dropEl._pd_elRect.width) {
-        dropEl.style.width = `${dropEl._pd_elRect.width}px`;
-        dropEl._pd_animation = true;
-      }
-      dropEl._pd_elRect = elRect;
-    }, dragEl => {
-      if (!dragEl._pd_elRect) return true;
-      const elRectDiff = getRectDiff(dragEl, dragEl._pd_elRect);
-      dragEl.style.transition = 'none';
-      if (elRectDiff.y !== 0 || elRectDiff.x !== 0) {
-        dragEl.style.transform = `translate(${elRectDiff.x}px, ${elRectDiff.y}px)`;
-        dragEl._pd_animation = true;
-      }
-      dragEl._pd_elRect = undefined;
-    });
-
+  afterSwap(dropArr) {
+    this.eachInDropArr(dropArr, this.prepareDropElAnim, this.prepareDragElAnim);
     this.dropEl.offsetWidth; // force reflow
+    this.eachInDropArr(dropArr, this.startDropElAnim, this.startDragElAnim);
+  }
 
-    this.eachInContainers(containers, dropEl => {
-      if (dropEl._pd_animation) {
-        dropEl.style.transition = `height ${this.duration}ms ease-out, width ${this.duration}ms ease-out`;
-        dropEl.style.height = `${dropEl._pd_elRect.height}px`;
-        dropEl.style.width = `${dropEl._pd_elRect.width}px`;
-        dropEl._pd_animation = undefined;
-      }
-      dropEl._pd_elRect = undefined;
-    }, dragEl => {
-      if (dragEl._pd_animation) {
-        dragEl.style.transition = `transform ${this.duration}ms ease-out`;
-        dragEl.style.transform = 'translate(0, 0)';
-        dragEl._pd_animation = undefined;
-      }
-    });
+  beforeDropElAnim(dropEl) {
+    clearTimeout(dropEl._pd_animTimeout);
+    dropEl._pd_elRect = this.getRect(dropEl);
+  }
 
-    this.animationTimeout = setTimeout(() => {
-      this.eachInContainers(containers, dropEl => {
-        dropEl.style.transition = '';
-        dropEl.style.height = '';
-        dropEl.style.width = '';
-      }, dragEl => {
+  beforeDragElAnim(dragEl) {
+    dragEl._pd_elRect = this.getRect(dragEl);
+  }
+
+  prepareDropElAnim(dropEl) {
+    const elRect = this.getRect(dropEl);
+
+    dropEl.style.transition = 'none';
+
+    if (elRect.height !== dropEl._pd_elRect.height) {
+      dropEl.style.height = `${dropEl._pd_elRect.height}px`;
+      dropEl._pd_animation = true;
+    }
+
+    if (elRect.width !== dropEl._pd_elRect.width) {
+      dropEl.style.width = `${dropEl._pd_elRect.width}px`;
+      dropEl._pd_animation = true;
+    }
+
+    dropEl._pd_elRect = elRect;
+  }
+
+  prepareDragElAnim(dragEl) {
+    if (!dragEl._pd_elRect) return true;
+
+    const elRectDiff = this.getRectDiff(dragEl, dragEl._pd_elRect);
+
+    dragEl.style.transition = 'none';
+    dragEl.style.pointerEvents = '';
+
+    if (elRectDiff.y !== 0 || elRectDiff.x !== 0) {
+      dragEl.style.transform = `translate(${elRectDiff.x}px, ${elRectDiff.y}px)`;
+      dragEl._pd_animation = true;
+    }
+
+    dragEl._pd_elRect = undefined;
+  }
+
+  startDropElAnim(dropEl) {
+    if (dropEl._pd_animation) {
+      dropEl.style.transition = `height ${this.duration}ms ease-out, width ${this.duration}ms ease-out`;
+      dropEl.style.height = `${dropEl._pd_elRect.height}px`;
+      dropEl.style.width = `${dropEl._pd_elRect.width}px`;
+      dropEl._pd_animation = undefined;
+    }
+
+    dropEl._pd_animTimeout = setTimeout(this.getDropElAnimTimeout(dropEl), this.duration);
+    dropEl._pd_elRect = undefined;
+  }
+
+  startDragElAnim(dragEl) {
+    if (dragEl._pd_animation) {
+      dragEl.style.transition = `transform ${this.duration}ms ease-out`;
+      dragEl.style.transform = 'translate(0, 0)';
+      dragEl.style.pointerEvents = 'none';
+      dragEl._pd_animation = undefined;
+    }
+  }
+
+  getDropElAnimTimeout(dropEl) {
+    return () => {
+      dropEl.style.transition = '';
+      dropEl.style.height = '';
+      dropEl.style.width = '';
+      dropEl._pd_animTimeout = undefined;
+
+      this.each(dropEl.children, dragEl => {
         dragEl.style.transition = '';
         dragEl.style.transform = '';
+        dragEl.style.pointerEvents = '';
       });
-    }, this.duration);
+    };
   }
 }
 
