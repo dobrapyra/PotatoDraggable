@@ -8,7 +8,7 @@
     "build": "webpack --mode=development",
     "watch": "webpack --mode=development --watch",
     "production": "webpack --mode=production -p",
-    "serve": "http-server . -p 4000 -o"
+    "serve": "webpack-dev-server --open"
   },
   "author": "dobrapyra",
   "license": "ISC",
@@ -22,7 +22,8 @@
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
     "webpack": "^4.29.6",
-    "webpack-cli": "^3.1.2"
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.2.1"
   },
   "dependencies": {}
 }

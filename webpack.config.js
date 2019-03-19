@@ -8,6 +8,11 @@ module.exports = (env, args) => {
   return {
     mode: devMode ? 'development' : 'production',
     devtool: devMode ? 'inline-source-map' : 'none',
+    devServer: {
+      contentBase: path.resolve(__dirname, '.'),
+      port: 4000,
+      open: true
+    },
     entry: './src/main.js',
     output: {
       path: path.resolve(__dirname, './dist'),
