@@ -21,6 +21,13 @@ module.exports = (env, args) => {
       port: 4000,
       open: true,
       hot: true,
+      watchOptions: {
+        ignored: [
+          'demo/**/*.*',
+          'dist/**/*.*',
+          'node_modules'
+        ]
+      },
     },
     entry: './src/js/main.js',
     output: {
