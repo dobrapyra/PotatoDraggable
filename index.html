@@ -73,6 +73,66 @@
     </div>
 
     <div class="example">
+      <div class="example__head">A single list with elements of different sizes</div>
+      <div class="example__body">
+        <div class="example__demo">
+
+          <div class="container">
+            <div class="container__body">
+              <div class="container__lists">
+
+                <div class="list">
+                  <div class="list__box">
+                    <div class="list__head">
+                      <div class="list__name">Different sizes list</div>
+                    </div>
+                    <div class="list__body">
+                      <div data-pd-drop-container="differentSizes" class="list__items">
+                        <div data-pd-draggable-item="differentSizes" class="item">
+                          <div class="item__box">Item 1</div>
+                        </div>
+                        <div data-pd-draggable-item="differentSizes" class="item">
+                          <div class="item__box item__box--large">Item 2 (large)</div>
+                        </div>
+                        <div data-pd-draggable-item="differentSizes" class="item">
+                          <div class="item__box">Item 3</div>
+                        </div>
+                        <div data-pd-draggable-item="differentSizes" class="item">
+                          <div class="item__box item__box--large">Item 4 (large)</div>
+                        </div>
+                        <div data-pd-draggable-item="differentSizes" class="item">
+                          <div class="item__box">Item 5</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="example__code">
+          <pre>
+<code class="language-html"><!--
+-->
+&lt;div data-pd-drop-container="differentSizes" class="list__items"&gt;
+  &lt;div data-pd-draggable-item="differentSizes" class="item"&gt;
+    &lt;div class="item__box"&gt;Item 1&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div data-pd-draggable-item="differentSizes" class="item"&gt;
+    &lt;div class="item__box item__box--large"&gt;Item 2 (large)&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;!-- more items with [data-pd-draggable-item="differentSizes"] --&gt;
+&lt;/div&gt;<!--
+--></code>
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="example">
       <div class="example__head">Single list with vertical scroll</div>
       <div class="example__body">
         <div class="example__demo">

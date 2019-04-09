@@ -8,12 +8,28 @@ module.exports = (env, args) => {
   return {
     mode: devMode ? 'development' : 'production',
     devtool: devMode ? 'inline-source-map' : 'none',
+    watch: devMode,
+    watchOptions: {
+      ignored: [
+        'demo/**/*.*',
+        'dist/**/*.*',
+        'node_modules'
+      ]
+    },
     devServer: {
       contentBase: path.resolve(__dirname, '.'),
       port: 4000,
-      open: true
+      open: true,
+      hot: true,
+      watchOptions: {
+        ignored: [
+          'demo/**/*.*',
+          'dist/**/*.*',
+          'node_modules'
+        ]
+      },
     },
-    entry: './src/main.js',
+    entry: './src/js/main.js',
     output: {
       path: path.resolve(__dirname, './dist'),
       filename: 'main.js',

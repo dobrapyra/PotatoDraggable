@@ -1,4 +1,4 @@
-import './scss/main.scss';
+import '../scss/main.scss';
 import Draggable from './draggable';
 
 new Draggable();

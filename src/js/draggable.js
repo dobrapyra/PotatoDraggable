@@ -394,9 +394,10 @@ class PotatoDraggable {
   }
 
   prepareDropElAnim(dropEl) {
-    const elRect = this.getRect(dropEl);
-
     dropEl.style.transition = 'none';
+
+    // reflow
+    const elRect = this.getRect(dropEl);
 
     if (elRect.height !== dropEl._pd_elRect.height) {
       dropEl.style.height = `${dropEl._pd_elRect.height}px`;
@@ -414,10 +415,11 @@ class PotatoDraggable {
   prepareDragElAnim(dragEl) {
     if (!dragEl._pd_elRect) return true;
 
-    const elRectDiff = this.getRectDiff(dragEl, dragEl._pd_elRect);
-
     dragEl.style.transition = 'none';
     dragEl.style.pointerEvents = '';
+
+    // reflow
+    const elRectDiff = this.getRectDiff(dragEl, dragEl._pd_elRect);
 
     if (elRectDiff.y !== 0 || elRectDiff.x !== 0) {
       dragEl.style.transform = `translate(${elRectDiff.x}px, ${elRectDiff.y}px)`;

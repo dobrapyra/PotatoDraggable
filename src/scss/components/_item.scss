@@ -17,6 +17,10 @@
     font-size: 14px;
     line-height: 18px;
     cursor: grab;
+
+    &--large {
+      padding: 16px 8px;
+    }
   }
 
   $root: &;
