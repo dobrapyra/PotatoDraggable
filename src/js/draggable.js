@@ -1,19 +1,20 @@
 import Point from './point';
 
 class PotatoDraggable {
-  constructor() {
-    this.attr = {
+  constructor(props = {}) {
+    this.attr = Object.assign({
       draggable: 'data-pd-draggable-item',
       container: 'data-pd-drop-container',
       drag: 'data-pd-drag',
       ghost: 'data-pd-ghost',
-    };
-    this.duration = 300;
-    this.dragDelay = {
+    }, props.attr);
+    this.duration = props.duration !== undefined ? props.duration : 300;
+    this.animate = this.duration > 0;
+    this.dragDelay = Object.assign({
       mouse: 0,
       touch: 200,
-    };
-    this.cancelThreshold = 4;
+    }, props.dragDelay);
+    this.cancelThreshold = props.cancelThreshold || 4;
 
     this.dragEl = null;
     this.dropEl = null;
@@ -307,11 +308,11 @@ class PotatoDraggable {
       const prevDropEl = this.dropEl;
       this.dropEl = dropEl;
 
-      this.beforeSwap(prevDropEl);
-      this.beforeSwap(dropEl);
+      if (this.animate) this.beforeSwap(prevDropEl);
+      if (this.animate) this.beforeSwap(dropEl);
       dropEl.appendChild(this.dragEl);
-      this.afterSwap(prevDropEl);
-      this.afterSwap(dropEl);
+      if (this.animate) this.afterSwap(prevDropEl);
+      if (this.animate) this.afterSwap(dropEl);
       return;
     }
 
@@ -337,9 +338,9 @@ class PotatoDraggable {
       // prevent unnecessary insert
       if (this.dragEl.nextElementSibling === dragEl) return;
 
-      this.beforeSwap(dropEl);
+      if (this.animate) this.beforeSwap(dropEl);
       dropEl.insertBefore(this.dragEl, dragEl);
-      this.afterSwap(dropEl);
+      if (this.animate) this.afterSwap(dropEl);
       return;
     }
 
@@ -348,16 +349,16 @@ class PotatoDraggable {
       // prevent unnecessary insert
       if (this.dragEl === nextEl) return;
 
-      this.beforeSwap(dropEl);
+      if (this.animate) this.beforeSwap(dropEl);
       dropEl.insertBefore(this.dragEl, nextEl);
-      this.afterSwap(dropEl);
+      if (this.animate) this.afterSwap(dropEl);
       return;
     }
 
     // the last in container
-    this.beforeSwap(dropEl);
+    if (this.animate) this.beforeSwap(dropEl);
     dropEl.appendChild(this.dragEl);
-    this.afterSwap(dropEl);
+    if (this.animate) this.afterSwap(dropEl);
   }
 
   dragEnd() {
