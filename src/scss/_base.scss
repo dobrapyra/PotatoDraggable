@@ -24,3 +24,19 @@ body {
   padding: 10px 30px;
   margin: 0 auto;
 }
+
+.goToRepo {
+  display: inline-block;
+  padding: 4px 10px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  line-height: 20px;
+  text-decoration: none;
+  color: $cWhite;
+  background-color: $cPrimary;
+  transition: background-color .2s;
+
+  &:hover {
+    background-color: $cBlack;
+  }
+}
