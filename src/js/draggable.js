@@ -1,15 +1,9 @@
 import Point from './point';
 
 class PotatoDraggable {
-  constructor() {
-    this.draggableAttr = 'data-pd-draggable-item';
-    this.containerAttr = 'data-pd-drop-container';
-    this.duration = 300;
-    this.dragDelay = {
-      mouse: 0,
-      touch: 200,
-    };
-    this.cancelThreshold = 4;
+  constructor(props = {}) {
+    this.setConfig(props);
+    this.setEvents(props);
 
     this.dragEl = null;
     this.dropEl = null;
@@ -48,6 +42,93 @@ class PotatoDraggable {
     this.scrollEl = document.scrollingElement || document.documentElement || document;
 
     this.bindPassiveEvents();
+  }
+
+  setConfig(props) {
+    this.attr = Object.assign({
+      draggable: 'data-pd-draggable-item',
+      container: 'data-pd-drop-container',
+      drag: 'data-pd-drag',
+      ghost: 'data-pd-ghost',
+    }, props.attr);
+    this.duration = props.duration !== undefined ? props.duration : 300;
+    this.animate = this.duration > 0;
+    this.dragDelay = Object.assign({
+      mouse: 0,
+      touch: 200,
+    }, props.dragDelay);
+    this.cancelThreshold = props.cancelThreshold || 4;
+  }
+
+  setEvents(props) {
+    const events = props.events || {};
+    const noop = () => {};
+
+    /**
+     * @function onGrab
+     * @param {Element} dropEl
+     * @param {Element} dragEl
+     */
+    this.handleGrab = events.onGrab || noop;
+
+    /**
+     * @function onDrop
+     * @param {Element} dropEl
+     * @param {Element} dragEl
+     */
+    this.handleDrop = events.onDrop || noop;
+
+    /**
+     * @function onSwap
+     * @param {Element} dropEl
+     * @param {Element} dragEl
+     * @param {number} prevIndex
+     * @param {number} nextIndex
+     */
+    this.handleSwap = events.onSwap || noop;
+
+    /**
+     * @function onAppend
+     * @param {Element} dropEl
+     * @param {Element} dragEl
+     */
+    this.handleAppend = events.onAppend || noop;
+
+    /**
+     * @function onRemove
+     * @param {Element} dropEl
+     * @param {Element} dragEl
+     * @param {number} elIndex
+     */
+    this.handleRemove = events.onRemove || noop;
+
+    /**
+     * @function onAppendChild
+     * @param {Element} dropEl
+     * @param {Element} dragEl
+     */
+    this.handleAppendChild = events.onAppendChild || ((dropEl, dragEl) => {
+      dropEl.appendChild(dragEl);
+    });
+
+    /**
+     * @function onRemoveChild
+     * @param {Element} dropEl
+     * @param {Element} dragEl
+     */
+    this.handleRemoveChild = events.onRemoveChild || ((dropEl, dragEl) => {
+      dropEl.removeChild(dragEl);
+    });
+
+    /**
+     * @function onInsertBefore
+     * @param {Element} dropEl
+     * @param {Element} dragEl
+     * @param {Element} relEl
+     */
+    this.handleInsertBefore = events.onInsertBefore || ((dropEl, dragEl, relEl) => {
+      dropEl.insertBefore(dragEl, relEl);
+    });
   }
 
   getEventOptions() {
@@ -111,12 +192,10 @@ class PotatoDraggable {
     }
   }
 
-  eachInDropArr(dropArr, dropElFn, dragElFn) {
-    this.each(dropArr, dropEl => {
-      dropElFn(dropEl);
-      this.each(dropEl.children, dragEl => {
-        dragElFn(dragEl);
-      });
+  eachInDropEl(dropEl, dropElFn, dragElFn) {
+    dropElFn(dropEl);
+    this.each(dropEl.children, dragEl => {
+      dragElFn(dragEl);
     });
   }
 
@@ -136,11 +215,11 @@ class PotatoDraggable {
   }
 
   closestContainer(el, groupId) {
-    return this.closestByAttr(el, this.containerAttr, groupId);
+    return this.closestByAttr(el, this.attr.container, groupId);
   }
 
   closestDraggable(el, groupId) {
-    return this.closestByAttr(el, this.draggableAttr, groupId);
+    return this.closestByAttr(el, this.attr.draggable, groupId);
   }
 
   addEvent(eventName, eventFunction) {
@@ -254,7 +333,7 @@ class PotatoDraggable {
 
     this.body.appendChild(this.ghostEl);
 
-    this.ghostEl.setAttribute('data-pd-ghost', '');
+    this.ghostEl.setAttribute(this.attr.ghost, '');
   }
 
   updateGhostPosition(point) {
@@ -271,13 +350,15 @@ class PotatoDraggable {
   }
 
   dragStart() {
-    this.groupId = this.dragEl.getAttribute(this.draggableAttr);
+    this.groupId = this.dragEl.getAttribute(this.attr.draggable);
     if (this.groupId === null) return; // probably not necessary
 
     this.dragging = true;
 
     this.dropEl = this.closestContainer(this.dragEl);
     if (this.movePoint) this.startPoint = this.movePoint;
+
+    this.handleGrab(this.dropEl, this.dragEl);
 
     this.createGhost();
 
@@ -286,7 +367,7 @@ class PotatoDraggable {
     this.dropEl.style.height = '';
     this.dropEl.style.width = '';
 
-    this.dragEl.setAttribute('data-pd-drag', '');
+    this.dragEl.setAttribute(this.attr.drag, '');
   }
 
   dragMove() {
@@ -305,9 +386,14 @@ class PotatoDraggable {
       const prevDropEl = this.dropEl;
       this.dropEl = dropEl;
 
-      this.beforeSwap([dropEl, prevDropEl]);
-      this.dropEl.appendChild(this.dragEl);
-      this.afterSwap([dropEl, prevDropEl]);
+      if (this.animate) this.beforeSwap(prevDropEl);
+      if (this.animate) this.beforeSwap(dropEl);
+      this.handleRemove(prevDropEl, this.dragEl, this.getIndex(this.dragEl));
+      this.handleRemoveChild(prevDropEl, this.dragEl);
+      this.handleAppend(dropEl, this.dragEl);
+      this.handleAppendChild(dropEl, this.dragEl);
+      if (this.animate) this.afterSwap(prevDropEl);
+      if (this.animate) this.afterSwap(dropEl);
       return;
     }
 
@@ -318,7 +404,7 @@ class PotatoDraggable {
     if (dragEl === this.dragEl) return;
 
     // other dropEl, it should be the same
-    if (dragEl.parentElement !== this.dropEl ) return;
+    if (dragEl.parentElement !== this.dropEl) return;
 
     const rectDiff = this.getRectDiff(this.dragEl, this.getRect(dragEl));
     const axis = Math.abs(rectDiff.x) > Math.abs(rectDiff.y) ? 'x' : 'y';
@@ -329,32 +415,38 @@ class PotatoDraggable {
     this.swapEl = dragEl;
     this.swapDir = dir;
 
-    if (this.getIndex(dragEl) < this.getIndex(this.dragEl)) {
+    const prevIndex = this.getIndex(this.dragEl);
+    const dragIndex = this.getIndex(dragEl);
+    if (dragIndex < prevIndex) {
       // prevent unnecessary insert
       if (this.dragEl.nextElementSibling === dragEl) return;
 
-      this.beforeSwap([dropEl]);
-      this.dropEl.insertBefore(this.dragEl, dragEl);
-      this.afterSwap([dropEl]);
+      // move up
+      if (this.animate) this.beforeSwap(dropEl);
+      this.handleSwap(dropEl, this.dragEl, prevIndex, dragIndex);
+      this.handleInsertBefore(dropEl, this.dragEl, dragEl);
+      if (this.animate) this.afterSwap(dropEl);
       return;
     }
 
     const nextEl = dragEl.nextElementSibling;
-
     if (nextEl) {
       // prevent unnecessary insert
       if (this.dragEl === nextEl) return;
 
-      this.beforeSwap([dropEl]);
-      this.dropEl.insertBefore(this.dragEl, nextEl);
-      this.afterSwap([dropEl]);
+      // move down
+      if (this.animate) this.beforeSwap(dropEl);
+      this.handleSwap(dropEl, this.dragEl, prevIndex, dragIndex);
+      this.handleInsertBefore(dropEl, this.dragEl, nextEl);
+      if (this.animate) this.afterSwap(dropEl);
       return;
     }
 
     // the last in container
-    this.beforeSwap([dropEl]);
-    this.dropEl.appendChild(this.dragEl);
-    this.afterSwap([dropEl]);
+    if (this.animate) this.beforeSwap(dropEl);
+    this.handleSwap(dropEl, this.dragEl, prevIndex, dragIndex);
+    this.handleAppendChild(dropEl, this.dragEl);
+    if (this.animate) this.afterSwap(dropEl);
   }
 
   dragEnd() {
@@ -366,22 +458,25 @@ class PotatoDraggable {
     this.swapDir = 0;
     this.groupId = '';
 
+    this.dragEl.removeAttribute(this.attr.drag);
+
     this.destroyGhost();
 
-    this.dragEl.removeAttribute('data-pd-drag');
+    this.handleGrab(this.dropEl, this.dragEl);
+
     this.dragEl = null;
     this.dropEl = null;
     this.swapEl = null;
   }
 
-  beforeSwap(dropArr) {
-    this.eachInDropArr(dropArr, this.beforeDropElAnim, this.beforeDragElAnim);
+  beforeSwap(dropEl) {
+    this.eachInDropEl(dropEl, this.beforeDropElAnim, this.beforeDragElAnim);
   }
 
-  afterSwap(dropArr) {
-    this.eachInDropArr(dropArr, this.prepareDropElAnim, this.prepareDragElAnim);
+  afterSwap(dropEl) {
+    this.eachInDropEl(dropEl, this.prepareDropElAnim, this.prepareDragElAnim);
     this.dropEl.offsetWidth; // force reflow
-    this.eachInDropArr(dropArr, this.startDropElAnim, this.startDragElAnim);
+    this.eachInDropEl(dropEl, this.startDropElAnim, this.startDragElAnim);
   }
 
   beforeDropElAnim(dropEl) {
