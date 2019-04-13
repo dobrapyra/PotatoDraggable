@@ -2,19 +2,8 @@ import Point from './point';
 
 class PotatoDraggable {
   constructor(props = {}) {
-    this.attr = Object.assign({
-      draggable: 'data-pd-draggable-item',
-      container: 'data-pd-drop-container',
-      drag: 'data-pd-drag',
-      ghost: 'data-pd-ghost',
-    }, props.attr);
-    this.duration = props.duration !== undefined ? props.duration : 300;
-    this.animate = this.duration > 0;
-    this.dragDelay = Object.assign({
-      mouse: 0,
-      touch: 200,
-    }, props.dragDelay);
-    this.cancelThreshold = props.cancelThreshold || 4;
+    this.setConfig(props);
+    this.setEvents(props);
 
     this.dragEl = null;
     this.dropEl = null;
@@ -53,6 +42,45 @@ class PotatoDraggable {
     this.scrollEl = document.scrollingElement || document.documentElement || document;
 
     this.bindPassiveEvents();
+  }
+
+  setConfig(props) {
+    this.attr = Object.assign({
+      draggable: 'data-pd-draggable-item',
+      container: 'data-pd-drop-container',
+      drag: 'data-pd-drag',
+      ghost: 'data-pd-ghost',
+    }, props.attr);
+    this.duration = props.duration !== undefined ? props.duration : 300;
+    this.animate = this.duration > 0;
+    this.dragDelay = Object.assign({
+      mouse: 0,
+      touch: 200,
+    }, props.dragDelay);
+    this.cancelThreshold = props.cancelThreshold || 4;
+  }
+
+  setEvents(props) {
+    this.handleGrab = props.onGrab || ((dropEl, dragEl) => {
+      console.log(dropEl, dragEl); // eslint-disable-line no-console
+    });
+    this.handleDrop = props.onDrop || ((dropEl, dragEl) => {
+      console.log(dropEl, dragEl); // eslint-disable-line no-console
+    });
+    this.handleSwap = props.onSwap || ((dropEl, dragEl, prevIndex, nextIndex) => {
+      console.log(dropEl, dragEl); // eslint-disable-line no-console
+      console.log(prevIndex, nextIndex); // eslint-disable-line no-console
+    });
+
+    this.handleRemove = props.onRemove || ((dropEl, dragEl) => {
+      dropEl.removeChild(dragEl);
+    });
+    this.handleAppend = props.onAppend || ((dropEl, dragEl) => {
+      dropEl.appendChild(dragEl);
+    });
+    this.handleInsertBefore = props.onInsertBefore || ((dropEl, dragEl, relEl) => {
+      dropEl.insertBefore(dragEl, relEl);
+    });
   }
 
   getEventOptions() {
@@ -282,6 +310,8 @@ class PotatoDraggable {
     this.dropEl = this.closestContainer(this.dragEl);
     if (this.movePoint) this.startPoint = this.movePoint;
 
+    this.handleGrab(this.dropEl, this.dragEl);
+
     this.createGhost();
 
     // reset after animation
@@ -310,7 +340,8 @@ class PotatoDraggable {
 
       if (this.animate) this.beforeSwap(prevDropEl);
       if (this.animate) this.beforeSwap(dropEl);
-      dropEl.appendChild(this.dragEl);
+      this.handleRemove(prevDropEl, this.dragEl);
+      this.handleAppend(dropEl, this.dragEl);
       if (this.animate) this.afterSwap(prevDropEl);
       if (this.animate) this.afterSwap(dropEl);
       return;
@@ -334,12 +365,16 @@ class PotatoDraggable {
     this.swapEl = dragEl;
     this.swapDir = dir;
 
-    if (this.getIndex(dragEl) < this.getIndex(this.dragEl)) {
+    const prevIndex = this.getIndex(this.dragEl);
+    const dragIndex = this.getIndex(dragEl);
+    if (dragIndex < prevIndex) {
       // prevent unnecessary insert
       if (this.dragEl.nextElementSibling === dragEl) return;
 
+      // move up
       if (this.animate) this.beforeSwap(dropEl);
-      dropEl.insertBefore(this.dragEl, dragEl);
+      this.handleSwap(dropEl, this.dragEl, prevIndex, dragIndex);
+      this.handleInsertBefore(dropEl, this.dragEl, dragEl);
       if (this.animate) this.afterSwap(dropEl);
       return;
     }
@@ -349,15 +384,18 @@ class PotatoDraggable {
       // prevent unnecessary insert
       if (this.dragEl === nextEl) return;
 
+      // move down
       if (this.animate) this.beforeSwap(dropEl);
-      dropEl.insertBefore(this.dragEl, nextEl);
+      this.handleSwap(dropEl, this.dragEl, prevIndex, dragIndex);
+      this.handleInsertBefore(dropEl, this.dragEl, nextEl);
       if (this.animate) this.afterSwap(dropEl);
       return;
     }
 
     // the last in container
     if (this.animate) this.beforeSwap(dropEl);
-    dropEl.appendChild(this.dragEl);
+    this.handleSwap(dropEl, this.dragEl, prevIndex, dragIndex);
+    this.handleAppend(dropEl, this.dragEl);
     if (this.animate) this.afterSwap(dropEl);
   }
 
@@ -370,9 +408,12 @@ class PotatoDraggable {
     this.swapDir = 0;
     this.groupId = '';
 
+    this.dragEl.removeAttribute(this.attr.drag);
+
     this.destroyGhost();
 
-    this.dragEl.removeAttribute(this.attr.drag);
+    this.handleGrab(this.dropEl, this.dragEl);
+
     this.dragEl = null;
     this.dropEl = null;
     this.swapEl = null;
