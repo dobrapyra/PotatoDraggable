@@ -29,10 +29,12 @@ module.exports = (env, args) => {
         ]
       },
     },
-    entry: './src/js/main.js',
+    entry: {
+      'potato-draggable': './src/js/main.js',
+    },
     output: {
       path: path.resolve(__dirname, './dist'),
-      filename: 'main.js',
+      filename: '[name].js',
       // publicPath: './dist'
     },
     module: {
@@ -59,7 +61,7 @@ module.exports = (env, args) => {
     },
     plugins: [
       new MiniCssExtractPlugin({
-        filename: 'main.css'
+        filename: 'demo-styles.css'
       })
     ]
   };
