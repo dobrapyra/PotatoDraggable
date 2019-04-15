@@ -1,4 +1,6 @@
 import '../scss/main.scss';
 import Draggable from './draggable';
 
-new Draggable();
+(function(window){
+  window.Draggable = Draggable;
+})(window);

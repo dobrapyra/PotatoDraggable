@@ -70,8 +70,9 @@ They can also be used to custom DOM manipulation.
    * @function onGrab
    * @param {Element} dropEl
    * @param {Element} dragEl
+   * @param {object} dataTransfer
    */
-  (dropEl, dragEl) => {}
+  (dropEl, dragEl, dataTransfer) => {}
   ```
 
 * onDrop
@@ -80,8 +81,9 @@ They can also be used to custom DOM manipulation.
    * @function onDrop
    * @param {Element} dropEl
    * @param {Element} dragEl
+   * @param {object} dataTransfer
    */
-  (dropEl, dragEl) => {}
+  (dropEl, dragEl, dataTransfer) => {}
   ```
 
 * onSwap
@@ -90,10 +92,11 @@ They can also be used to custom DOM manipulation.
    * @function onSwap
    * @param {Element} dropEl
    * @param {Element} dragEl
+   * @param {object} dataTransfer
    * @param {number} prevIndex
    * @param {number} nextIndex
    */
-  (dropEl, dragEl, prevIndex, nextIndex) => {}
+  (dropEl, dragEl, dataTransfer, prevIndex, nextIndex) => {}
   ```
 
 * onAppend
@@ -102,8 +105,9 @@ They can also be used to custom DOM manipulation.
    * @function onAppend
    * @param {Element} dropEl
    * @param {Element} dragEl
+   * @param {object} dataTransfer
    */
-  (dropEl, dragEl) => {}
+  (dropEl, dragEl, dataTransfer) => {}
   ```
 
 * onRemove
@@ -112,9 +116,10 @@ They can also be used to custom DOM manipulation.
    * @function onRemove
    * @param {Element} dropEl
    * @param {Element} dragEl
+   * @param {object} dataTransfer
    * @param {number} elIndex
    */
-  (dropEl, dragEl, elIndex) => {}
+  (dropEl, dragEl, dataTransfer, elIndex) => {}
   ```
 
 ### Internal DOM manipulation events

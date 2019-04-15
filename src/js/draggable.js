@@ -5,6 +5,8 @@ class PotatoDraggable {
     this.setConfig(props);
     this.setEvents(props);
 
+    this.dataTransfer = {};
+
     this.dragEl = null;
     this.dropEl = null;
     this.swapEl = null;
@@ -68,6 +70,7 @@ class PotatoDraggable {
      * @function onGrab
      * @param {Element} dropEl
      * @param {Element} dragEl
+     * @param {object} dataTransfer
      */
     this.handleGrab = events.onGrab || noop;
 
@@ -75,6 +78,7 @@ class PotatoDraggable {
      * @function onDrop
      * @param {Element} dropEl
      * @param {Element} dragEl
+     * @param {object} dataTransfer
      */
     this.handleDrop = events.onDrop || noop;
 
@@ -82,6 +86,7 @@ class PotatoDraggable {
      * @function onSwap
      * @param {Element} dropEl
      * @param {Element} dragEl
+     * @param {object} dataTransfer
      * @param {number} prevIndex
      * @param {number} nextIndex
      */
@@ -91,6 +96,7 @@ class PotatoDraggable {
      * @function onAppend
      * @param {Element} dropEl
      * @param {Element} dragEl
+     * @param {object} dataTransfer
      */
     this.handleAppend = events.onAppend || noop;
 
@@ -98,6 +104,7 @@ class PotatoDraggable {
      * @function onRemove
      * @param {Element} dropEl
      * @param {Element} dragEl
+     * @param {object} dataTransfer
      * @param {number} elIndex
      */
     this.handleRemove = events.onRemove || noop;
@@ -358,7 +365,7 @@ class PotatoDraggable {
     this.dropEl = this.closestContainer(this.dragEl);
     if (this.movePoint) this.startPoint = this.movePoint;
 
-    this.handleGrab(this.dropEl, this.dragEl);
+    this.handleGrab(this.dropEl, this.dragEl, this.dataTransfer);
 
     this.createGhost();
 
@@ -388,9 +395,9 @@ class PotatoDraggable {
 
       if (this.animate) this.beforeSwap(prevDropEl);
       if (this.animate) this.beforeSwap(dropEl);
-      this.handleRemove(prevDropEl, this.dragEl, this.getIndex(this.dragEl));
+      this.handleRemove(prevDropEl, this.dragEl, this.dataTransfer, this.getIndex(this.dragEl));
       this.handleRemoveChild(prevDropEl, this.dragEl);
-      this.handleAppend(dropEl, this.dragEl);
+      this.handleAppend(dropEl, this.dragEl, this.dataTransfer);
       this.handleAppendChild(dropEl, this.dragEl);
       if (this.animate) this.afterSwap(prevDropEl);
       if (this.animate) this.afterSwap(dropEl);
@@ -423,7 +430,7 @@ class PotatoDraggable {
 
       // move up
       if (this.animate) this.beforeSwap(dropEl);
-      this.handleSwap(dropEl, this.dragEl, prevIndex, dragIndex);
+      this.handleSwap(dropEl, this.dragEl, this.dataTransfer, prevIndex, dragIndex);
       this.handleInsertBefore(dropEl, this.dragEl, dragEl);
       if (this.animate) this.afterSwap(dropEl);
       return;
@@ -436,7 +443,7 @@ class PotatoDraggable {
 
       // move down
       if (this.animate) this.beforeSwap(dropEl);
-      this.handleSwap(dropEl, this.dragEl, prevIndex, dragIndex);
+      this.handleSwap(dropEl, this.dragEl, this.dataTransfer, prevIndex, dragIndex);
       this.handleInsertBefore(dropEl, this.dragEl, nextEl);
       if (this.animate) this.afterSwap(dropEl);
       return;
@@ -444,7 +451,7 @@ class PotatoDraggable {
 
     // the last in container
     if (this.animate) this.beforeSwap(dropEl);
-    this.handleSwap(dropEl, this.dragEl, prevIndex, dragIndex);
+    this.handleSwap(dropEl, this.dragEl, this.dataTransfer, prevIndex, dragIndex);
     this.handleAppendChild(dropEl, this.dragEl);
     if (this.animate) this.afterSwap(dropEl);
   }
@@ -462,7 +469,9 @@ class PotatoDraggable {
 
     this.destroyGhost();
 
-    this.handleGrab(this.dropEl, this.dragEl);
+    this.handleDrop(this.dropEl, this.dragEl, this.dataTransfer);
+
+    this.dataTransfer = {};
 
     this.dragEl = null;
     this.dropEl = null;
