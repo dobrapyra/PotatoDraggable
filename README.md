@@ -71,8 +71,9 @@ They can also be used to custom DOM manipulation.
    * @param {Element} dropEl
    * @param {Element} dragEl
    * @param {object} dataTransfer
+   * @param {number} elIndex
    */
-  (dropEl, dragEl, dataTransfer) => {}
+  (dropEl, dragEl, dataTransfer, elIndex) => {}
   ```
 
 * onDrop
@@ -82,8 +83,9 @@ They can also be used to custom DOM manipulation.
    * @param {Element} dropEl
    * @param {Element} dragEl
    * @param {object} dataTransfer
+   * @param {number} elIndex
    */
-  (dropEl, dragEl, dataTransfer) => {}
+  (dropEl, dragEl, dataTransfer, elIndex) => {}
   ```
 
 * onSwap
