@@ -71,6 +71,7 @@ class PotatoDraggable {
      * @param {Element} dropEl
      * @param {Element} dragEl
      * @param {object} dataTransfer
+     * @param {number} elIndex
      */
     this.handleGrab = events.onGrab || noop;
 
@@ -79,6 +80,7 @@ class PotatoDraggable {
      * @param {Element} dropEl
      * @param {Element} dragEl
      * @param {object} dataTransfer
+     * @param {number} elIndex
      */
     this.handleDrop = events.onDrop || noop;
 
@@ -143,7 +145,7 @@ class PotatoDraggable {
     try {
       const cb = () => {};
       const opt = Object.defineProperty({}, 'passive', {
-        get() { passiveSupport = true; return true; }
+        get() { passiveSupport = true; return true; },
       });
       window.addEventListener('check-passive', cb, opt);
       window.removeEventListener('check-passive', cb, opt);
@@ -201,7 +203,7 @@ class PotatoDraggable {
 
   eachInDropEl(dropEl, dropElFn, dragElFn) {
     dropElFn(dropEl);
-    this.each(dropEl.children, dragEl => {
+    this.each(dropEl.children, (dragEl) => {
       dragElFn(dragEl);
     });
   }
@@ -240,6 +242,11 @@ class PotatoDraggable {
   bindPassiveEvents() {
     this.addEvent('mousedown', this.onMouseDown);
     this.addEvent('touchstart', this.onTouchStart);
+  }
+
+  unbindPassiveEvents() {
+    this.removeEvent('mousedown', this.onMouseDown);
+    this.removeEvent('touchstart', this.onTouchStart);
   }
 
   bindActiveEvents() {
@@ -365,7 +372,7 @@ class PotatoDraggable {
     this.dropEl = this.closestContainer(this.dragEl);
     if (this.movePoint) this.startPoint = this.movePoint;
 
-    this.handleGrab(this.dropEl, this.dragEl, this.dataTransfer);
+    this.handleGrab(this.dropEl, this.dragEl, this.dataTransfer, this.getIndex(this.dragEl));
 
     this.createGhost();
 
@@ -469,7 +476,7 @@ class PotatoDraggable {
 
     this.destroyGhost();
 
-    this.handleDrop(this.dropEl, this.dragEl, this.dataTransfer);
+    this.handleDrop(this.dropEl, this.dragEl, this.dataTransfer, this.getIndex(this.dragEl));
 
     this.dataTransfer = {};
 
@@ -484,7 +491,7 @@ class PotatoDraggable {
 
   afterSwap(dropEl) {
     this.eachInDropEl(dropEl, this.prepareDropElAnim, this.prepareDragElAnim);
-    this.dropEl.offsetWidth; // force reflow
+    this.dropEl.offsetWidth; // eslint-disable-line no-unused-expressions
     this.eachInDropEl(dropEl, this.startDropElAnim, this.startDragElAnim);
   }
 
@@ -561,12 +568,17 @@ class PotatoDraggable {
       dropEl.style.width = '';
       dropEl._pd_animTimeout = undefined;
 
-      this.each(dropEl.children, dragEl => {
+      this.each(dropEl.children, (dragEl) => {
         dragEl.style.transition = '';
         dragEl.style.transform = '';
         dragEl.style.pointerEvents = '';
       });
     };
+  }
+
+  destroy() {
+    this.unbindActiveEvents();
+    this.unbindPassiveEvents();
   }
 }
 
