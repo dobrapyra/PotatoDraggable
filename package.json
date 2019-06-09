@@ -10,6 +10,14 @@
     "production": "webpack --mode=production -p",
     "serve": "webpack-dev-server --open"
   },
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/dobrapyra/PotatoDraggable.git"
+  },
+  "homepage": "https://github.com/dobrapyra/PotatoDraggable",
+  "bugs": {
+    "url": "https://github.com/dobrapyra/PotatoDraggable/issues"
+  },
   "author": "dobrapyra",
   "license": "ISC",
   "devDependencies": {

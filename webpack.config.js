@@ -36,6 +36,8 @@ module.exports = (env, args) => {
       path: path.resolve(__dirname, './dist'),
       filename: '[name].js',
       // publicPath: './dist'
+      // library: 'PotatoDraggable',
+      // libraryTarget: 'umd',
     },
     module: {
       rules: [
