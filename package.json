@@ -11,8 +11,8 @@
     "serve": "webpack-dev-server --open"
   },
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/dobrapyra/PotatoDraggable.git"
+    "type": "git",
+    "url": "https://github.com/dobrapyra/PotatoDraggable.git"
   },
   "homepage": "https://github.com/dobrapyra/PotatoDraggable",
   "bugs": {
